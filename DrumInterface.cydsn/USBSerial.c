@@ -156,8 +156,8 @@ static portTASK_FUNCTION( vUSBSerialTask, pvParameters )
         {
             /* Get and process inputs here */
             //vTaskDelay(mDelay);
-            //USBUART_MIDI_IN_Service();
-            //USBUART_MIDI_OUT_Service();
+            USBUART_MIDI_IN_Service();
+            USBUART_MIDI_OUT_Service();
         }
         vTaskDelay(xDelay);
 	}
