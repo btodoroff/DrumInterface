@@ -94,7 +94,7 @@
 #include "print.h"
 #include "QPeek.h"
 #include "semtest.h"
-#include "USBSerial.h"
+#include "USB.h"
 #include "xformatc.h"
 /*---------------------------------------------------------------------------*/
 
@@ -151,31 +151,31 @@ int main( void )
 
 	/* Start the standard demo tasks.  These are just here to exercise the
 	kernel port and provide examples of how the FreeRTOS API can be used. */
-	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
-	vCreateBlockTimeTasks();
-	vStartCountingSemaphoreTasks();
-	vStartDynamicPriorityTasks();
-	vStartMathTasks( mainINTEGER_TASK_PRIORITY );
-	vStartGenericQueueTasks( mainGEN_QUEUE_TASK_PRIORITY );
-	vStartIntegerMathTasks( mainINTEGER_TASK_PRIORITY );
-	vStartPolledQueueTasks( mainQUEUE_POLL_PRIORITY );
-	vStartQueuePeekTasks();
-	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
+	//vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
+	//vCreateBlockTimeTasks();
+	//vStartCountingSemaphoreTasks();
+	//vStartDynamicPriorityTasks();
+	//vStartMathTasks( mainINTEGER_TASK_PRIORITY );
+	//vStartGenericQueueTasks( mainGEN_QUEUE_TASK_PRIORITY );
+	//vStartIntegerMathTasks( mainINTEGER_TASK_PRIORITY );
+	//vStartPolledQueueTasks( mainQUEUE_POLL_PRIORITY );
+	//vStartQueuePeekTasks();
+	//vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartLEDFlashTasks( mainFLASH_TEST_TASK_PRIORITY );
-    vStartUSBSerialTasks( mainUSBSERIAL_TASK_PRIORITY );
-	vAltStartComTestTasks( mainCOM_TEST_TASK_PRIORITY, 57600, mainCOM_LED );
-	vStartInterruptQueueTasks();
+    vStartUSBTasks( mainUSBSERIAL_TASK_PRIORITY );
+	//vAltStartComTestTasks( mainCOM_TEST_TASK_PRIORITY, 57600, mainCOM_LED );
+	//vStartInterruptQueueTasks();
 
 	/* Start the error checking task. */
   	( void ) xTaskCreate( vCheckTask, "Check", 1000, NULL, mainCHECK_TASK_PRIORITY, NULL );
 
 	/* Configure the timers used by the fast interrupt timer test. */
-	vSetupTimerTest();
+	//vSetupTimerTest();
 
 	/* The suicide tasks must be created last as they need to know how many
 	tasks were running prior to their creation in order to ascertain whether
 	or not the correct/expected number of tasks are running at any given time. */
-	vCreateSuicidalTasks( mainCREATOR_TASK_PRIORITY );
+	//vCreateSuicidalTasks( mainCREATOR_TASK_PRIORITY );
 
 	/* Will only get here if there was insufficient memory to create the idle
     task.  The idle task is created within vTaskStartScheduler(). */
@@ -204,7 +204,6 @@ extern cyisraddress CyRamVectors[];
 
 	/* Start-up the peripherals. */
 
-
 	/* Start the UART. */
 	UART_1_Start();
 
@@ -212,36 +211,14 @@ extern cyisraddress CyRamVectors[];
 	vParTestInitialise();
 
 	/* Start the PWM modules that drive the IntQueue tests. */
-	High_Frequency_PWM_0_Start();
-	High_Frequency_PWM_1_Start();
+	//High_Frequency_PWM_0_Start();
+	//High_Frequency_PWM_1_Start();
 
 	/* Start the timers for the Jitter test. */
-	Timer_20KHz_Start();
-	Timer_48MHz_Start();
+	//Timer_20KHz_Start();
+	//Timer_48MHz_Start();
 }
 /*---------------------------------------------------------------------------*/
-void get_dec_str (char* str, size_t len, uint32_t val)
-{
-  uint8_t i;
-  for(i=1; i<=len; i++)
-  {
-    str[len-i] = (uint8_t) ((val % 10UL) + '0');
-    val/=10;
-  }
-
-}
-
-void get_hex_str (char* str, size_t len, uint32_t val)
-{
-  uint8_t i;
-  const char hexchar[] = "0123456789ABCDE"; 
-  for(i=1; i<=len; i++)
-  {
-    str[len-i] = (uint8_t) (hexchar[(val & 0xfL)]);
-    val/=16;
-  }
-
-}
 
 static void myPutchar(void *arg,char c)
 {
@@ -276,7 +253,7 @@ extern unsigned short usMaxJitter;
 		vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
 
 		/* Check that all of the Demo tasks are still running. */
-		if( pdTRUE != xAreBlockingQueuesStillRunning() )
+		/*if( pdTRUE != xAreBlockingQueuesStillRunning() )
 		{
 			usErrorCode |= 0x1;
 		}
@@ -351,8 +328,13 @@ extern unsigned short usMaxJitter;
 		{
             xsprintf(strbuf,"Fail at: %u Error: 0x%04X\r\n",ulIteration++,usErrorCode);
             usbserial_putString(strbuf);
-        }
-
+        }*/
+        usbserial_putString("Tick\r\n");
+        if(ulIteration&0x1)
+            usbmidi_noteOn(64,100);
+        else
+            usbmidi_noteOff(64,100);
+        ulIteration++;
 	}
 }
 /*---------------------------------------------------------------------------*/

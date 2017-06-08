@@ -81,14 +81,14 @@
           <File BuildType="BUILD" Toolchain="">FreeRTOSConfig.h</File>
           <File BuildType="BUILD" Toolchain="">IntQueueTimer.h</File>
           <File BuildType="BUILD" Toolchain="">xformatc.h</File>
-          <File BuildType="BUILD" Toolchain="">USBSerial.h</File>
+          <File BuildType="BUILD" Toolchain="">USB.h</File>
           <File BuildType="BUILD" Toolchain="">IntQueueTimer.c</File>
           <File BuildType="BUILD" Toolchain="">main.c</File>
           <File BuildType="BUILD" Toolchain="">ParTest.c</File>
           <File BuildType="BUILD" Toolchain="">Serial.c</File>
           <File BuildType="BUILD" Toolchain="">TimerTest.c</File>
           <File BuildType="BUILD" Toolchain="">xformatc.c</File>
-          <File BuildType="BUILD" Toolchain="">USBSerial.c</File>
+          <File BuildType="BUILD" Toolchain="">USB.c</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\Source">

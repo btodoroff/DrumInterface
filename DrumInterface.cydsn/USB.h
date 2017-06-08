@@ -67,99 +67,13 @@
     1 tab == 4 spaces!
 */
 
-/**
- * This version of flash .c is for use on systems that have limited stack space
- * and no display facilities.  The complete version can be found in the 
- * Demo/Common/Full directory.
- * 
- * Three tasks are created, each of which flash an LED at a different rate.  The first 
- * LED flashes every 200ms, the second every 400ms, the third every 600ms.
- *
- * The LED flash tasks provide instant visual feedback.  They show that the scheduler 
- * is still operational.
- *
- */
+#ifndef USBSERIAL_H
+#define USBSERIAL_H
 
+void vStartSerialTasks( UBaseType_t uxPriority );
+void usbserial_putString(const char msg[]);
+void usbmidi_noteOn(uint8 note, uint8 velocity);
+void usbmidi_noteOff(uint8 note, uint8 velocity);
 
-#include <stdlib.h>
-
-/* Scheduler include files. */
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-
-/* Demo program include files. */
-#include "partest.h"
-#include "USBSerial.h"
-
-#define USBSerialSTACK_SIZE		configMINIMAL_STACK_SIZE
-const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
-const TickType_t mDelay = 5000 / portTICK_PERIOD_MS;
-    
-/* The task that is created three times. */
-static portTASK_FUNCTION_PROTO( vUSBSerialTask, pvParameters );
-
-SemaphoreHandle_t USBMutex;
-
-/*-----------------------------------------------------------*/
-
-void usbserial_putString(const char msg[])
-{
-    if(0 == USBUART_GetConfiguration()) return;
-    xSemaphoreTake(USBMutex,portMAX_DELAY);
-    while(0 == USBUART_CDCIsReady()) vTaskDelay(xDelay);
-    USBUART_PutString(msg);
-    xSemaphoreGive(USBMutex);
-}
-
-void vStartUSBSerialTasks( UBaseType_t uxPriority )
-{
-    /*Setup the mutex to control port access*/
-    USBMutex = xSemaphoreCreateMutex();
-	/* Spawn the task. */
-	xTaskCreate( vUSBSerialTask, "USBSerial", USBSerialSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
-
-}
-
-void USBUART_callbackLocalMidiEvent(uint8 cable, uint8* midiMsg)
-{
-    return;
-}
-/*-----------------------------------------------------------*/
-
-static portTASK_FUNCTION( vUSBSerialTask, pvParameters )
-{
-   	/* The parameters are not used. */
-	( void ) pvParameters;
-
-    /* Start the USB_UART */
-    /* Start USBFS operation with 5-V operation. */
-    USBUART_Start(0, USBUART_5V_OPERATION);
-    USBUART_MIDI_Init();
-
-    
-	for(;;)
-	{
-        /* Host can send double SET_INTERFACE request. */
-        if (0u != USBUART_IsConfigurationChanged())
-        {
-            /* Initialize IN endpoints when device is configured. */
-            if (0u != USBUART_GetConfiguration())
-            {
-                /* Enumeration is done, enable OUT endpoint to receive data 
-                 * from host. */
-                USBUART_CDC_Init();
-            }
-        }
-        
-        if(0 != USBUART_GetConfiguration())
-        {
-            /* Get and process inputs here */
-            //vTaskDelay(mDelay);
-            USBUART_MIDI_IN_Service();
-            USBUART_MIDI_OUT_Service();
-        }
-        vTaskDelay(xDelay);
-	}
-} /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
+#endif
 
