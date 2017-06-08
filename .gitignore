@@ -1,0 +1,10 @@
+#################
+## PSoC Creator
+#################
+
+*.cywrk.*
+*.cyprj.*
+*.lst
+ARM_GCC_493/
+codegentemp/
+Generated_Source/
