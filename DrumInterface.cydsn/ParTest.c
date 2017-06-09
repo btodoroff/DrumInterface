@@ -100,15 +100,6 @@ void vParTestSetLED( unsigned portBASE_TYPE uxLED, signed portBASE_TYPE xValue )
 			case 0:
 				Pin_LED_0_Write( xValue & 0x1 );
 				break;
-			case 1:
-				Pin_LED_1_Write( xValue & 0x1 );
-				break;
-			case 2:
-				Pin_LED_2_Write( xValue & 0x1 );
-				break;
-			case 3:
-				Pin_LED_3_Write( xValue & 0x1 );
-				break;
 			default:
 				/* Do nothing. */
 				break;
