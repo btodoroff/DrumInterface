@@ -980,4 +980,18 @@ unsigned xvformat(void (*outchar)(void *,char),void *arg,const char * fmt,va_lis
 	return param.count;
 }
 
+static void myPutchar(void *arg,char c)
+{
+    char ** s = (char **)arg;
+    *(*s)++ = c;
+}
+
+void xsprintf(char *buf,const char *fmt,...)
+{
+    va_list list;
+    va_start(list,fmt);
+    xvformat(myPutchar,(void *)&buf,fmt,list);
+    *buf = 0;
+    va_end(list);
+}
 /*lint -restore */

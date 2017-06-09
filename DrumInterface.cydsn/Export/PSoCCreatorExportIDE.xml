@@ -6,7 +6,7 @@
     <Toolchain Name="ARM GCC Generic" Selected="True">
       <Tool Name="prebuild" Command="" Options="" />
       <Tool Name="assembler" Command="arm-none-eabi-as.exe" Options="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -alh=${OutputDir}/${CompileFile}.lst -g" />
-      <Tool Name="compiler" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -I..\Source\include -I..\Source\portable\GCC\ARM_CM3 -I..\Common\include -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -Wall -ffunction-sections -O0 -ffat-lto-objects" />
+      <Tool Name="compiler" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -I..\Source\include -I..\Source\portable\GCC\ARM_CM3 -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -Wall -ffunction-sections -O0 -ffat-lto-objects" />
       <Tool Name="linker" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -g -ffunction-sections -O0 -ffat-lto-objects -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn\Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections" />
       <Tool Name="postbuild" Command="" Options="" />
     </Toolchain>
@@ -34,27 +34,6 @@
       <LinkerFile Toolchain="ARM IAR Generic">.\Generated_Source\PSoC5\Cm3Iar.icf</LinkerFile>
     </LinkerFiles>
     <Folders>
-      <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\Common\include">
-        <Files Root="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn">
-          <File BuildType="BUILD" Toolchain="">..\Common\include\BlockQ.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\semtest.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\serial.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\comtest2.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\countsem.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\death.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\dynamic.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\flash.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\flop.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\GenQTest.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\integer.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\IntQueue.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\mevents.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\partest.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\PollQ.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\print.h</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\include\QPeek.h</File>
-        </Files>
-      </Folder>
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\Source\include">
         <Files Root="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn">
           <File BuildType="BUILD" Toolchain="">..\Source\include\mpu_wrappers.h</File>
@@ -79,16 +58,17 @@
         <Files Root="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn">
           <File BuildType="BUILD" Toolchain="">device.h</File>
           <File BuildType="BUILD" Toolchain="">FreeRTOSConfig.h</File>
-          <File BuildType="BUILD" Toolchain="">IntQueueTimer.h</File>
           <File BuildType="BUILD" Toolchain="">xformatc.h</File>
-          <File BuildType="BUILD" Toolchain="">USB.h</File>
-          <File BuildType="BUILD" Toolchain="">IntQueueTimer.c</File>
+          <File BuildType="BUILD" Toolchain="">USBSerial.h</File>
+          <File BuildType="BUILD" Toolchain="">flash.h</File>
+          <File BuildType="BUILD" Toolchain="">partest.h</File>
+          <File BuildType="BUILD" Toolchain="">USBMidi.h</File>
           <File BuildType="BUILD" Toolchain="">main.c</File>
-          <File BuildType="BUILD" Toolchain="">ParTest.c</File>
-          <File BuildType="BUILD" Toolchain="">Serial.c</File>
-          <File BuildType="BUILD" Toolchain="">TimerTest.c</File>
           <File BuildType="BUILD" Toolchain="">xformatc.c</File>
-          <File BuildType="BUILD" Toolchain="">USB.c</File>
+          <File BuildType="BUILD" Toolchain="">USBMidi.c</File>
+          <File BuildType="BUILD" Toolchain="">ParTest.c</File>
+          <File BuildType="BUILD" Toolchain="">flash.c</File>
+          <File BuildType="BUILD" Toolchain="">USBSerial.c</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\Source">
@@ -102,25 +82,6 @@
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\Source\portable\MemMang">
         <Files Root="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn">
           <File BuildType="BUILD" Toolchain="">..\Source\portable\MemMang\heap_2.c</File>
-        </Files>
-      </Folder>
-      <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\Common\Minimal">
-        <Files Root="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn">
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\IntSemTest.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\PollQ.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\QPeek.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\semtest.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\BlockQ.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\blocktim.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\comtest.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\countsem.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\death.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\dynamic.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\flash.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\flop.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\GenQTest.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\integer.c</File>
-          <File BuildType="BUILD" Toolchain="">..\Common\Minimal\IntQueue.c</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn\Generated_Source\PSoC5">
@@ -202,14 +163,6 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer_20KHz.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer_20KHz.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer_20KHz_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isrTimer_20KHz_TC.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isrTimer_20KHz_TC.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer_48MHz.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer_48MHz.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer_48MHz_PM.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_1_IntClock.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_1_IntClock.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_Dm_aliases.h</File>

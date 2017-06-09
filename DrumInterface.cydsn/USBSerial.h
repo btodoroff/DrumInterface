@@ -67,14 +67,12 @@
     1 tab == 4 spaces!
 */
 
-#ifndef TIMER_DEMO_H
-#define TIMER_DEMO_H
+#ifndef USBSERIAL_H
+#define USBSERIAL_H
 
-void vStartTimerDemoTask( TickType_t xBaseFrequencyIn );
-BaseType_t xAreTimerDemoTasksStillRunning( TickType_t xCycleFrequency );
-void vTimerPeriodicISRTests( void );
+void vStartUSBSerialTasks( UBaseType_t uxPriority );
+void usbserial_putString(const char msg[]);
+void usbserial_xprintf(const char *fmt,...);
 
-#endif /* TIMER_DEMO_H */
-
-
+#endif
 

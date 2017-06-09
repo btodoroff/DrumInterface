@@ -76,25 +76,10 @@
 #include "semphr.h"
 
 /* Common Demo includes. */
-#include "serial.h"
-#include "BlockQ.h"
-#include "blocktim.h"
-#include "comtest.h"
-#include "countsem.h"
-#include "death.h"
-#include "dynamic.h"
 #include "flash.h"
-#include "flop.h"
-#include "GenQTest.h"
-#include "integer.h"
-#include "IntQueue.h"
-#include "mevents.h"
 #include "partest.h"
-#include "PollQ.h"
-#include "print.h"
-#include "QPeek.h"
-#include "semtest.h"
-#include "USB.h"
+#include "USBSerial.h"
+#include "USBMidi.h"
 #include "xformatc.h"
 /*---------------------------------------------------------------------------*/
 
@@ -117,6 +102,7 @@ tick hook. */
 #define mainCOM_TEST_TASK_PRIORITY			( tskIDLE_PRIORITY + 1 )
 #define mainFLASH_TEST_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
 #define mainUSBSERIAL_TASK_PRIORITY	        ( tskIDLE_PRIORITY + 1 )
+#define mainUSBMIDI_TASK_PRIORITY	        ( tskIDLE_PRIORITY + 1 )
 /*---------------------------------------------------------------------------*/
 
 /*
@@ -162,7 +148,8 @@ int main( void )
 	//vStartQueuePeekTasks();
 	//vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
 	vStartLEDFlashTasks( mainFLASH_TEST_TASK_PRIORITY );
-    vStartUSBTasks( mainUSBSERIAL_TASK_PRIORITY );
+    vStartUSBSerialTasks( mainUSBSERIAL_TASK_PRIORITY );
+    vStartUSBMidiTasks( mainUSBMIDI_TASK_PRIORITY);
 	//vAltStartComTestTasks( mainCOM_TEST_TASK_PRIORITY, 57600, mainCOM_LED );
 	//vStartInterruptQueueTasks();
 
@@ -203,6 +190,7 @@ extern cyisraddress CyRamVectors[];
 	CyRamVectors[ 15 ] = ( cyisraddress ) xPortSysTickHandler;
 
 	/* Start-up the peripherals. */
+    USBUART_Start(0, USBUART_5V_OPERATION);
 
 	/* Start the UART. */
 	UART_1_Start();
@@ -220,7 +208,7 @@ extern cyisraddress CyRamVectors[];
 }
 /*---------------------------------------------------------------------------*/
 
-static void myPutchar(void *arg,char c)
+/*static void myPutchar(void *arg,char c)
 {
     char ** s = (char **)arg;
     *(*s)++ = c;
@@ -233,16 +221,16 @@ static void xsprintf(char *buf,const char *fmt,...)
     xvformat(myPutchar,(void *)&buf,fmt,list);
     *buf = 0;
     va_end(list);
-}
+}*/
 
 void vCheckTask( void *pvParameters )
 {
 char strbuf[128];
 TickType_t xDelay = 0;
-unsigned short usErrorCode = 0;
+//unsigned short usErrorCode = 0;
 unsigned long ulIteration = 0;
-unsigned long ulMaxJitter = 0;
-extern unsigned short usMaxJitter;
+//unsigned long ulMaxJitter = 0;
+//extern unsigned short usMaxJitter;
 
 	/* Intialise the sleeper. */
 	xDelay = xTaskGetTickCount();
@@ -252,84 +240,8 @@ extern unsigned short usMaxJitter;
 		/* Perform this check every mainCHECK_DELAY milliseconds. */
 		vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
 
-		/* Check that all of the Demo tasks are still running. */
-		/*if( pdTRUE != xAreBlockingQueuesStillRunning() )
-		{
-			usErrorCode |= 0x1;
-		}
-
-		if( pdTRUE != xAreBlockTimeTestTasksStillRunning() )
-		{
-			usErrorCode |= 0x2;
-		}
-
-		if( pdTRUE != xAreCountingSemaphoreTasksStillRunning() )
-		{
-			usErrorCode |= 0x4;
-		}
-
-		if( pdTRUE != xIsCreateTaskStillRunning() )
-		{
-			usErrorCode |= 0x8;
-		}
-
-		if( pdTRUE != xAreDynamicPriorityTasksStillRunning() )
-		{
-			usErrorCode |= 0x10;
-		}
-
-		if( pdTRUE != xAreMathsTaskStillRunning() )
-		{
-			usErrorCode |= 0x20;
-		}
-
-		if( pdTRUE != xAreGenericQueueTasksStillRunning() )
-		{
-			usErrorCode |= 0x40;
-		}
-
-		if( pdTRUE != xAreIntegerMathsTaskStillRunning() )
-		{
-			usErrorCode |= 0x80;
-		}
-
-		if( pdTRUE != xArePollingQueuesStillRunning() )
-		{
-			usErrorCode |= 0x100;
-		}
-
-		if( pdTRUE != xAreQueuePeekTasksStillRunning() )
-		{
-			usErrorCode |= 0x200;
-		}
-
-		if( pdTRUE != xAreSemaphoreTasksStillRunning() )
-		{
-			usErrorCode |= 0x400;
-		}
-
-		if( pdTRUE != xAreComTestTasksStillRunning() )
-		{
-			usErrorCode |= 0x800;
-		}
-
-		if( pdTRUE != xAreIntQueueTasksStillRunning() )
-		{
-			usErrorCode |= 0x1000;
-		}
-        
-		if( 0 == usErrorCode )
-		{
-            ulMaxJitter = ( usMaxJitter * mainNS_PER_CLOCK );
-            xsprintf(strbuf,"Pass: %lu Jitter(ns): %lu\r\n",ulIteration++,ulMaxJitter);
+        xsprintf(strbuf,"Tick #%d\r\n",ulIteration);
             usbserial_putString(strbuf);
-		}
-		else
-		{
-            xsprintf(strbuf,"Fail at: %u Error: 0x%04X\r\n",ulIteration++,usErrorCode);
-            usbserial_putString(strbuf);
-        }*/
-        usbserial_putString("Tick\r\n");
         if(ulIteration&0x1)
             usbmidi_noteOn(64,100);
         else
