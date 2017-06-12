@@ -37,6 +37,7 @@
 #define configQUEUE_REGISTRY_SIZE		10
 #define configGENERATE_RUN_TIME_STATS	0
 #define configUSE_MALLOC_FAILED_HOOK	1
+//#define configSUPPORT_STATIC_ALLOCATION 1
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */

@@ -6,6 +6,7 @@
 #include "semphr.h"
 #include "xformatc.h"
 #include "USBSerial.h"
+#include "SeqADC.h"
 
 /* Demo program include files. */
 //#include "partest.h"
@@ -46,6 +47,7 @@ void vStartUSBMidiTasks( UBaseType_t uxPriority )
 {
     /*Setup the mutex to control port access*/
     USBMidiMutex = xSemaphoreCreateMutex();
+
 	/* Spawn the task. */
 	xTaskCreate( vUSBMidiTask, "USBMidi", USBMIDISTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 
@@ -63,6 +65,7 @@ static portTASK_FUNCTION( vUSBMidiTask, pvParameters )
 {
    	/* The parameters are not used. */
 	( void ) pvParameters;
+    static struct ADCEvent queueEvent;
 
     /* Start the USB_UART */
     /* Start USBFS operation with 5-V operation. */
@@ -86,6 +89,15 @@ static portTASK_FUNCTION( vUSBMidiTask, pvParameters )
         
         if(0 != USBUART_GetConfiguration())
         {
+            if(pdPASS == xQueueReceive(ADCEventQueue,&queueEvent,0))
+            {
+                if(queueEvent.type == ADCEVENT_HIT)
+                {
+                    usbserial_xprintf("Trigger:%02d @ %03d\r\n",queueEvent.data.hit.triggerNumber,queueEvent.data.hit.velocity);
+                    usbmidi_noteOn(64+queueEvent.data.hit.triggerNumber,queueEvent.data.hit.velocity);
+                    usbmidi_noteOff(64+queueEvent.data.hit.triggerNumber,0);
+                }
+            }
             /* Get and process inputs here */
             USBUART_MIDI_IN_Service();
             USBUART_MIDI_OUT_Service();

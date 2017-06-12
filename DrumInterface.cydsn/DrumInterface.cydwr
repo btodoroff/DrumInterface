@@ -364,6 +364,7 @@
       <Data key="289a8dd4-b439-4dcc-b229-17674ce5879f" value="Pin_LED_3" />
       <Data key="31701add-6005-44d9-ae4e-af20af5e04c1" value="Startup_Release_Switch" />
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="Rx_1" />
+      <Data key="77715107-f8d5-47e5-a629-0fb83101ac6b" value="Pad" />
       <Data key="a774cbee-f634-4288-91e6-9ae6a6f16e58/ed092b9b-d398-4703-be89-cebf998501f6" value="LCD_Character_Display_LCDPort" />
       <Data key="b3ac9170-30ae-409e-a625-ad268e914172" value="Pin_LED_2" />
       <Data key="beca5e2d-f70f-4900-a4db-7eca1ed3126e/8b77a6c4-10a0-4390-971c-672353e2a49c" value="USBUART_Dm" />
@@ -395,6 +396,20 @@
     <Group key="1425177d-0d0e-4468-8bcc-e638e5509a9b">
       <Group key="0">
         <Data key="Port Format" value="12,6" />
+      </Group>
+    </Group>
+    <Group key="77715107-f8d5-47e5-a629-0fb83101ac6b">
+      <Group key="0">
+        <Data key="Port Format" value="0,6" />
+      </Group>
+      <Group key="1">
+        <Data key="Port Format" value="0,0" />
+      </Group>
+      <Group key="2">
+        <Data key="Port Format" value="0,2" />
+      </Group>
+      <Group key="3">
+        <Data key="Port Format" value="0,4" />
       </Group>
     </Group>
     <Group key="a774cbee-f634-4288-91e6-9ae6a6f16e58/ed092b9b-d398-4703-be89-cebf998501f6">

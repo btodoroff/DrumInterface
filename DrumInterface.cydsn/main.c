@@ -163,15 +163,15 @@ unsigned long ulIteration = 0;
 		/* Perform this check every mainCHECK_DELAY milliseconds. */
 		vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
 
-        xsprintf(strbuf,"Tick #%d\r\n",ulIteration);
+        /*xsprintf(strbuf,"Tick #%d\r\n",ulIteration);
             usbserial_putString(strbuf);
         if(ulIteration&0x1)
-            usbmidi_noteOn(64,100);
+            usbmidi_noteOn(64,Trigger[2].lastSample>>4);
         else
-            usbmidi_noteOff(64,100);
+            usbmidi_noteOff(64,Trigger[3].lastSample>>4);*/
         SeqADCOutputSamples();
-        usbserial_xprintf("0 again: %d\r\n",lastSample[0]);
-        ulIteration++;
+        /*ulIteration++;*/
+        
 	}
 }
 /*---------------------------------------------------------------------------*/
