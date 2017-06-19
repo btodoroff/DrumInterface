@@ -6,8 +6,8 @@
     <Toolchain Name="ARM GCC Generic" Selected="True">
       <Tool Name="prebuild" Command="" Options="" />
       <Tool Name="assembler" Command="arm-none-eabi-as.exe" Options="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -alh=${OutputDir}/${CompileFile}.lst -g" />
-      <Tool Name="compiler" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -I..\Source\include -I..\Source\portable\GCC\ARM_CM3 -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -Wall -ffunction-sections -O0 -ffat-lto-objects" />
-      <Tool Name="linker" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -g -ffunction-sections -O0 -ffat-lto-objects -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn\Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections" />
+      <Tool Name="compiler" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -I..\Source\include -I..\Source\portable\GCC\ARM_CM3 -I.\u8glib -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -Wall -ffunction-sections -Og -ffat-lto-objects" />
+      <Tool Name="linker" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -g -ffunction-sections -Og -ffat-lto-objects -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn\Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections" />
       <Tool Name="postbuild" Command="" Options="" />
     </Toolchain>
     <Toolchain Name="ARM MDK Generic" Selected="False">
@@ -64,6 +64,7 @@
           <File BuildType="BUILD" Toolchain="">partest.h</File>
           <File BuildType="BUILD" Toolchain="">USBMidi.h</File>
           <File BuildType="BUILD" Toolchain="">SeqADC.h</File>
+          <File BuildType="BUILD" Toolchain="">Display.h</File>
           <File BuildType="BUILD" Toolchain="">main.c</File>
           <File BuildType="BUILD" Toolchain="">xformatc.c</File>
           <File BuildType="BUILD" Toolchain="">USBMidi.c</File>
@@ -71,6 +72,67 @@
           <File BuildType="BUILD" Toolchain="">flash.c</File>
           <File BuildType="BUILD" Toolchain="">USBSerial.c</File>
           <File BuildType="BUILD" Toolchain="">SeqADC.c</File>
+          <File BuildType="BUILD" Toolchain="">Display.c</File>
+        </Files>
+      </Folder>
+      <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn\u8glib">
+        <Files Root="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn">
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8.h</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2.h</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_uc1608.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_uc1610.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_uc1611.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_uc1701_dogs102.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_uc1701_mini12864.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_debounce.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_display.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_fonts.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_gpio.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_input_value.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_message.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_selection_list.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_setup.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_string.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_u8toa.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_u16toa.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_bitmap.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_box.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_buffer.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_circle.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_cleardisplay.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_d_memory.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_d_setup.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_font.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_fonts.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_hvline.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_input_value.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_intersection.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_kerning.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_line.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_ll_hvline.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_message.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_polygon.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_selection_list.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8g2_setup.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_8x8.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_byte.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_cad.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_a2printer.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ks0108.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ld7032_60x32.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ls013b7dh03.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_pcd8544_84x48.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_sed1330.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ssd1306_64x48.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ssd1306_128x32.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ssd1306_128x64_noname.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ssd1322.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_ssd1325.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_st7565.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_st7920.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_stdio.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_t6963.c</File>
+          <File BuildType="BUILD" Toolchain="">u8glib\u8x8_d_uc1604.c</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\Source">
@@ -119,39 +181,11 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_UART1_TX_BYTE_COMPLETE.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_UART1_RX_BYTE_RECEIVED.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_UART1_RX_BYTE_RECEIVED.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_audio.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_audio.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_boot.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_cdc.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_cdc.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_cls.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_descr.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_drv.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_episr.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_hid.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_hid.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_pm.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_std.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_vnd.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_midi.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_midi.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_pvt.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_cydmac.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_msc.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_msc.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_1_IntClock.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_1_IntClock.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_Dm_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_Dm.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_Dm.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_Dp_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_Dp.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USBUART_Dp.h</File>
           <File BuildType="BUILD" Toolchain="ARM GCC Generic">Generated_Source\PSoC5\cm3gcc.ld</File>
           <File BuildType="BUILD" Toolchain="ARM MDK Generic">Generated_Source\PSoC5\Cm3RealView.scat</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Cm3Start.c</File>
@@ -199,6 +233,56 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_IRQ.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_IRQ.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TRIGGER_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_audio.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_audio.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_boot.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_cdc.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_cdc.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_cls.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_descr.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_drv.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_episr.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_hid.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_hid.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_pm.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_std.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_vnd.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_midi.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_midi.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_pvt.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_cydmac.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_msc.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_msc.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_Dm_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_Dm.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_Dm.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_Dp_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_Dp.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\USB_Dp.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_MISO_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_MISO.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_MISO.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CS_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CS.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CS.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_INT.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_PVT.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_MOSI_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_MOSI.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_MOSI.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_SCLK_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_SCLK.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_SCLK.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_IntClock.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_IntClock.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\DISP_RESET_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\DISP_RESET.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\DISP_RESET.h</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn\Export\ARM_GCC_Generic">

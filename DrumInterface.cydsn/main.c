@@ -13,6 +13,7 @@
 #include "USBSerial.h"
 #include "USBMidi.h"
 #include "SeqADC.h"
+#include "Display.h"
 
 /*---------------------------------------------------------------------------*/
 
@@ -25,18 +26,19 @@ tick hook. */
 #define mainNS_PER_CLOCK ( ( unsigned long ) ( ( 1.0 / ( double ) configCPU_CLOCK_HZ ) * 1000000000.0 ) )
 
 /* Task priorities. */
-#define mainQUEUE_POLL_PRIORITY				( tskIDLE_PRIORITY + 2 )
+//#define mainQUEUE_POLL_PRIORITY			( tskIDLE_PRIORITY + 2 )
 #define mainCHECK_TASK_PRIORITY				( tskIDLE_PRIORITY + 3 )
-#define mainSEM_TEST_PRIORITY				( tskIDLE_PRIORITY + 1 )
-#define mainBLOCK_Q_PRIORITY				( tskIDLE_PRIORITY + 2 )
-#define mainCREATOR_TASK_PRIORITY           ( tskIDLE_PRIORITY + 3 )
-#define mainINTEGER_TASK_PRIORITY           ( tskIDLE_PRIORITY )
-#define mainGEN_QUEUE_TASK_PRIORITY			( tskIDLE_PRIORITY )
-#define mainCOM_TEST_TASK_PRIORITY			( tskIDLE_PRIORITY + 1 )
+//#define mainSEM_TEST_PRIORITY				( tskIDLE_PRIORITY + 1 )
+//#define mainBLOCK_Q_PRIORITY				( tskIDLE_PRIORITY + 2 )
+//#define mainCREATOR_TASK_PRIORITY         ( tskIDLE_PRIORITY + 3 )
+//#define mainINTEGER_TASK_PRIORITY         ( tskIDLE_PRIORITY )
+//#define mainGEN_QUEUE_TASK_PRIORITY		( tskIDLE_PRIORITY )
+//#define mainCOM_TEST_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
 #define mainFLASH_TEST_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
 #define mainUSBSERIAL_TASK_PRIORITY	        ( tskIDLE_PRIORITY + 2 )
 #define mainUSBMIDI_TASK_PRIORITY	        ( tskIDLE_PRIORITY + 1 )
 #define mainADC_TASK_PRIORITY               ( tskIDLE_PRIORITY + 1 )
+#define mainDISPLAY_TASK_PRIORITY           ( tskIDLE_PRIORITY + 3 )
 /*---------------------------------------------------------------------------*/
 
 /*
@@ -73,23 +75,16 @@ int main( void )
     vStartUSBSerialTasks( mainUSBSERIAL_TASK_PRIORITY );
     vStartADCTasks( mainADC_TASK_PRIORITY);
     vStartUSBMidiTasks( mainUSBMIDI_TASK_PRIORITY);
+    vStartDisplayTasks( mainDISPLAY_TASK_PRIORITY);
 	//vAltStartComTestTasks( mainCOM_TEST_TASK_PRIORITY, 57600, mainCOM_LED );
 	//vStartInterruptQueueTasks();
 
 	/* Start the error checking task. */
   	( void ) xTaskCreate( vCheckTask, "Check", 1000, NULL, mainCHECK_TASK_PRIORITY, NULL );
 
-	/* Configure the timers used by the fast interrupt timer test. */
-	//vSetupTimerTest();
-
-	/* The suicide tasks must be created last as they need to know how many
-	tasks were running prior to their creation in order to ascertain whether
-	or not the correct/expected number of tasks are running at any given time. */
-	//vCreateSuicidalTasks( mainCREATOR_TASK_PRIORITY );
-
+	vTaskStartScheduler();
 	/* Will only get here if there was insufficient memory to create the idle
     task.  The idle task is created within vTaskStartScheduler(). */
-	vTaskStartScheduler();
 
 	/* Should never reach here as the kernel will now be running.  If
 	vTaskStartScheduler() does return then it is very likely that there was
@@ -113,7 +108,7 @@ extern cyisraddress CyRamVectors[];
 	CyRamVectors[ 15 ] = ( cyisraddress ) xPortSysTickHandler;
 
 	/* Start-up the peripherals. */
-    USBUART_Start(0, USBUART_5V_OPERATION);
+    USB_Start(0, USB_5V_OPERATION);
 
 	/* Start the UART. */
 	UART_1_Start();
@@ -148,10 +143,9 @@ static void xsprintf(char *buf,const char *fmt,...)
 
 void vCheckTask( void *pvParameters )
 {
-char strbuf[128];
 TickType_t xDelay = 0;
 //unsigned short usErrorCode = 0;
-unsigned long ulIteration = 0;
+//unsigned long ulIteration = 0;
 //unsigned long ulMaxJitter = 0;
 //extern unsigned short usMaxJitter;
 

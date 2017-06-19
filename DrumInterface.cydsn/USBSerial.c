@@ -23,18 +23,18 @@ SemaphoreHandle_t USBSerialMutex;
 
 void usbserial_putString(const char msg[])
 {
-    if(0 == USBUART_GetConfiguration()) return;
+    if(0 == USB_GetConfiguration()) return;
     xSemaphoreTake(USBSerialMutex,portMAX_DELAY);
-    if(0 == USBUART_CDCIsReady())
+    if(0 == USB_CDCIsReady())
     {
         vTaskDelay(xDelay); //Wait 1ms for port to free up, then abandon
-        if(0 == USBUART_CDCIsReady())
+        if(0 == USB_CDCIsReady())
         {
             xSemaphoreGive(USBSerialMutex);
             return;
         }
     }
-    USBUART_PutString(msg);
+    USB_PutString(msg);
     xSemaphoreGive(USBSerialMutex);
 }
 
@@ -47,12 +47,12 @@ static void usbSerialPutchar(void *arg,char c)
 
 void usbserial_xprintf(const char *fmt,...)
 {
-    if(0 == USBUART_GetConfiguration()) return;
+    if(0 == USB_GetConfiguration()) return;
     xSemaphoreTake(USBSerialMutex,portMAX_DELAY);
-    if(0 == USBUART_CDCIsReady())
+    if(0 == USB_CDCIsReady())
     {
         vTaskDelay(xDelay); //Wait 1ms for port to free up, then abandon
-        if(0 == USBUART_CDCIsReady())
+        if(0 == USB_CDCIsReady())
         {
             xSemaphoreGive(USBSerialMutex);
             return;
@@ -63,7 +63,7 @@ void usbserial_xprintf(const char *fmt,...)
     va_start(list,fmt);
     xvformat(usbSerialPutchar,(void *)&buf,fmt,list);
     *buf = 0;
-    USBUART_PutString(usbserialBuf);
+    USB_PutString(usbserialBuf);
     va_end(list);
     xSemaphoreGive(USBSerialMutex);
 }
@@ -95,25 +95,25 @@ static portTASK_FUNCTION( vUSBSerialTask, pvParameters )
 	( void ) pvParameters;
 
     /* Start the USB_UART */
-    while(0u == USBUART_GetConfiguration());
-    USBUART_CDC_Init();
+    while(0u == USB_GetConfiguration());
+    USB_CDC_Init();
 
     
 	for(;;)
 	{
         /* Host can send double SET_INTERFACE request. */
-        if (0u != USBUART_IsConfigurationChanged())
+        if (0u != USB_IsConfigurationChanged())
         {
             /* Initialize IN endpoints when device is configured. */
-            if (0u != USBUART_GetConfiguration())
+            if (0u != USB_GetConfiguration())
             {
                 /* Enumeration is done, enable OUT endpoint to receive data 
                  * from host. */
-                USBUART_CDC_Init();
+                USB_CDC_Init();
             }
         }
         
-        if(0 != USBUART_GetConfiguration())
+        if(0 != USB_GetConfiguration())
         {
             /* Get and process inputs here */
         }

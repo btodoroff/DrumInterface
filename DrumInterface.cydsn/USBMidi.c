@@ -27,18 +27,18 @@ SemaphoreHandle_t USBMidiMutex;
 void usbmidi_noteOn(uint8 note, uint8 velocity)
 {
     uint8 onMsg[] = {0x9A,note,velocity};
-    if(0 == USBUART_GetConfiguration()) return;
+    if(0 == USB_GetConfiguration()) return;
     xSemaphoreTake(USBMidiMutex,portMAX_DELAY);
-    USBUART_PutUsbMidiIn(3,onMsg,USBUART_MIDI_CABLE_00);
+    USB_PutUsbMidiIn(3,onMsg,USB_MIDI_CABLE_00);
     xSemaphoreGive(USBMidiMutex);
 }
 
 void usbmidi_noteOff(uint8 note, uint8 velocity)
 {
     uint8 offMsg[] = {0x8A,note,velocity};
-    if(0 == USBUART_GetConfiguration()) return;
+    if(0 == USB_GetConfiguration()) return;
     xSemaphoreTake(USBMidiMutex,portMAX_DELAY);
-    USBUART_PutUsbMidiIn(3,offMsg,USBUART_MIDI_CABLE_00);
+    USB_PutUsbMidiIn(3,offMsg,USB_MIDI_CABLE_00);
     xSemaphoreGive(USBMidiMutex);
 }
 
@@ -53,7 +53,7 @@ void vStartUSBMidiTasks( UBaseType_t uxPriority )
 
 }
 
-void USBUART_callbackLocalMidiEvent(uint8 cable, uint8* midiMsg)
+void USB_callbackLocalMidiEvent(uint8 cable, uint8* midiMsg)
 {
     usbserial_xprintf("MIDI Event:%02X\r\n",midiMsg[0]);
     //usbserial_putString(strBuf);
@@ -69,25 +69,25 @@ static portTASK_FUNCTION( vUSBMidiTask, pvParameters )
 
     /* Start the USB_UART */
     /* Start USBFS operation with 5-V operation. */
-    while(0u == USBUART_GetConfiguration());
-    USBUART_MIDI_Init();
+    while(0u == USB_GetConfiguration());
+    USB_MIDI_Init();
 
     
 	for(;;)
 	{
         /* Host can send double SET_INTERFACE request. */
-        if (0u != USBUART_IsConfigurationChanged())
+        if (0u != USB_IsConfigurationChanged())
         {
             /* Initialize IN endpoints when device is configured. */
-            if (0u != USBUART_GetConfiguration())
+            if (0u != USB_GetConfiguration())
             {
                 /* Enumeration is done, enable OUT endpoint to receive data 
                  * from host. */
-                USBUART_MIDI_Init();
+                USB_MIDI_Init();
             }
         }
         
-        if(0 != USBUART_GetConfiguration())
+        if(0 != USB_GetConfiguration())
         {
             if(pdPASS == xQueueReceive(ADCEventQueue,&queueEvent,0))
             {
@@ -99,8 +99,8 @@ static portTASK_FUNCTION( vUSBMidiTask, pvParameters )
                 }
             }
             /* Get and process inputs here */
-            USBUART_MIDI_IN_Service();
-            USBUART_MIDI_OUT_Service();
+            USB_MIDI_IN_Service();
+            USB_MIDI_OUT_Service();
             
         }
         vTaskDelay(1);
