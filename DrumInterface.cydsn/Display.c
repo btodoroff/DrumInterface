@@ -22,64 +22,8 @@ SemaphoreHandle_t DisplayUpdateSemaphore;
 
 /*-----------------------------------------------------------*/
 
-//uint8_t u8x8_byte_hw_SPI4(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
-//{
-//    #ifdef DEBUG_UART
-//    char buff[20];
-//    #endif
-//    uint8_t *data;
-//    static int DC = 1;
-//    switch(msg)
-//    {
-//        case U8X8_MSG_BYTE_SEND:
-//            data = (uint8_t *)arg_ptr;
-//            while( arg_int > 0 )
-//            {
-//                #ifdef DEBUG_UART
-//                sprintf(buff,"%x\n",*data);
-//                UART_UartPutString(buff);
-//                #endif
-//                (void)SPI_WriteTxData(*data); // No Error Checking..
-//  	            data++;
-//	            arg_int--;
-//            }
-//            while((SPI_ReadTxStatus()&SPI_STS_SPI_IDLE));
-//
-//        break;
-//      
-//        case U8X8_MSG_BYTE_INIT: // Using the HW block you dont need to set 1/1
-//        break;
-//        case U8X8_MSG_BYTE_SET_DC:
-//            if(arg_int != DC)
-//            {
-//                while(!(SPI_ReadTxStatus()&SPI_STS_SPI_IDLE));
-//                DC = arg_int;
-//                if(arg_int)
-//                    CyPins_SetPin(DISP_D_NC_0);
-//                else
-//                    CyPins_ClearPin(DISP_D_NC_0);
-//            }
-//        break;
-//        case U8X8_MSG_BYTE_START_TRANSFER:
-//            //SPI_St
-//            //(void)I2C_MasterSendStart(u8x8_GetI2CAddress(u8x8)>>1,I2C_WRITE_XFER_MODE); // no Error Checking
-//         break;
-//        case U8X8_MSG_BYTE_END_TRANSFER:
-//            //(void)I2C_MasterSendStop(); // no error checking
-//        break;
-//    
-//        default:
-//            return 0;
-//    }
-//    
-//    return 1;
-//}
-
 uint8_t u8x8_byte_hw_SPI3(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
 {
-    #ifdef DEBUG_UART
-    char buff[20];
-    #endif
     uint8_t *data;
     static union {
         uint8 bytes[2];
@@ -92,11 +36,8 @@ uint8_t u8x8_byte_hw_SPI3(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_
 
             while( arg_int > 0 )
             {
-                #ifdef DEBUG_UART
-                sprintf(buff,"%x\n",*data);
-                UART_UartPutString(buff);
-                #endif
                 out.bytes[0] = *data;
+                while(0u == (SPI_TX_STATUS_REG & SPI_STS_TX_FIFO_NOT_FULL)) vTaskDelay(1); //Yield until SPI is free. 1 Tick ~= 1 byte @ 10khz
                 (void)SPI_WriteTxData(out.word); // No Error Checking..
   	            data++;
 	            arg_int--;
@@ -132,17 +73,15 @@ uint8_t psoc_gpio_and_delay_cb(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void 
     (void)arg_ptr;
     switch(msg)
     {
-        case U8X8_MSG_GPIO_AND_DELAY_INIT: // for now who cares?
-        break;
+
         case U8X8_MSG_DELAY_MILLI:
-            //CyDelay(arg_int);
             vTaskDelay(arg_int / portTICK_PERIOD_MS);
         break;
         case U8X8_MSG_DELAY_10MICRO:
             CyDelayUs(10);
         break;
         case U8X8_MSG_DELAY_100NANO:
-            CyDelayCycles((BCLK__BUS_CLK__HZ/1000000) * 100 - 16); //PSoC system reference guide says ~16 extra cycles 
+            CyDelayCycles((BCLK__BUS_CLK__HZ/1000000) * 100 - 16); //PSoC system reference guide says 8-23 extra cycles 
         break;
         case U8X8_MSG_GPIO_RESET:
             if(arg_int == 0)
@@ -150,14 +89,12 @@ uint8_t psoc_gpio_and_delay_cb(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void 
             else
                 CyPins_SetPin(DISP_RESET_0);
         break;
-        /*    - My Display has only I2C... which I have implemented in HW
+        /* Using the HW SPI interface, so we don't need most of this.
          * If you want to use a software interface or have these pins then you 
          * need to read and write them
-        case U8X8_MSG_GPIO_SPI_CLOCK:
-        case U8X8_MSG_GPIO_SPI_DATA:
+        case U8X8_MSG_GPIO_AND_DELAY_INIT: 
         case U8X8_MSG_GPIO_CS:
         case U8X8_MSG_GPIO_DC:
-        case U8X8_MSG_GPIO_RESET:
         case U8X8_MSG_GPIO_SPI_CLOCK:
         case U8X8_MSG_GPIO_SPI_DATA:		
         case U8X8_MSG_GPIO_D0:    
@@ -178,71 +115,48 @@ uint8_t psoc_gpio_and_delay_cb(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void 
 
 
 u8g2_t u8g2;
+static unsigned int currentPage = DISP_INTRO;
+void DisplayUpdatePage(unsigned int pageNum)
+{
+    currentPage = pageNum;
+    xSemaphoreGive(DisplayUpdateSemaphore);
+}
+
+void drawPage(unsigned int pageNum)
+{
+    SPI_WriteByte(0x00A1); //Kludge to keep segment mapping from reseting.
+    u8g2_FirstPage(&u8g2);
+    do
+    {
+        u8g2_SetFontPosTop(&u8g2);
+        u8g2_SetFontMode(&u8g2, 1);	// Transparent
+        u8g2_SetFontDirection(&u8g2, 0);
+        u8g2_SetFont(&u8g2, u8g2_font_profont12_tf);
+        switch(pageNum)
+        {
+            case DISP_INTRO:
+                u8g2_DrawStr(&u8g2, 1,1,"Drum Interface");
+                u8g2_DrawStr(&u8g2, 1,10,"Version 0.0.0");
+                u8g2_DrawStr(&u8g2, 1,30,"Loading...");
+            break;
+            case DISP_STATUS:
+                u8g2_DrawStr(&u8g2, 1,1,"Drum Interface");
+                u8g2_DrawStr(&u8g2, 1,10,"Version 0.0.0");
+                u8g2_DrawStr(&u8g2, 1,30,"Rockin'");
+            break;
+            case DISP_TUNING:
+            break;
+        }
+    } while( u8g2_NextPage(&u8g2) );
+}
+
 void vStartDisplayTasks( UBaseType_t uxPriority )
 {
     /*Setup the mutex to control port access*/
     DisplayMutex = xSemaphoreCreateMutex();
     DisplayUpdateSemaphore = xSemaphoreCreateBinary();
-    
     SPI_Start();
-//    //Set up charge pump
-//    SPI_WriteByte(0x00ae); 
-//    SPI_WriteByte(0x008d); 
-//    SPI_WriteByte(0x0014); 
-//    //Display On
-//    SPI_WriteByte(0x00af); 
-//    //All on regardless of RAM
-//    SPI_WriteByte(0x00a5);
-//    //All on RAM
-//    SPI_WriteByte(0x00a4);
-//    //All on regardless of RAM
-//    //SPI_WriteByte(0x00a5);
     
-    
-    
-    
-    
-    
-    //usbserial_putString("Calling Setup\r\n");
-    u8g2_Setup_ssd1306_128x64_noname_1(&u8g2, U8G2_R0, u8x8_byte_hw_SPI3, psoc_gpio_and_delay_cb);
-    //u8x8_Setup(&u8x8, u8x8_d_ssd1306_128x64_noname, u8x8_cad_ssd13xx_i2c, u8x8_byte_hw_i2c, psoc_gpio_and_delay_cb);
-
-    
-    //usbserial_putString("Calling Init\r\n");
-    u8g2_InitDisplay(&u8g2);  
-    u8g2_SetPowerSave(&u8g2,0);
-
-
-    //usbserial_putString("Calling ClearDisplay\n");        
-    u8g2_ClearDisplay(&u8g2);    
-    
-    u8g2_FirstPage(&u8g2);
-    do
-    {
-        u8g2_SetFontMode(&u8g2, 1);	// Transparent
-        u8g2_SetFontDirection(&u8g2, 0);
-        /*u8g2_SetFont(&u8g2, u8g2_font_inb24_mf);
-        u8g2_DrawStr(&u8g2, 0, 30, "U");
-        
-        u8g2_SetFontDirection(&u8g2, 1);
-        u8g2_SetFont(&u8g2, u8g2_font_inb30_mn);
-        u8g2_DrawStr(&u8g2, 21,8,"8");
-            
-        u8g2_SetFontDirection(&u8g2, 0);
-        u8g2_SetFont(&u8g2, u8g2_font_inb24_mf);
-        u8g2_DrawStr(&u8g2, 51,30,"g");
-        u8g2_DrawStr(&u8g2, 67,30,"\xb2");*/
-        
-        //u8g2_DrawHLine(&u8g2, 2, 35, 47);
-        //u8g2_DrawHLine(&u8g2, 3, 36, 47);
-        //u8g2_DrawVLine(&u8g2, 45, 32, 12);
-        //u8g2_DrawVLine(&u8g2, 46, 33, 12); 
-      
-        u8g2_SetFont(&u8g2, u8g2_font_4x6_tr);
-        u8g2_DrawStr(&u8g2, 1,54,"TODOROFF");
-    } while( u8g2_NextPage(&u8g2) );
-    
-    xSemaphoreGive(DisplayUpdateSemaphore);
 	/* Spawn the task. */
 	xTaskCreate( vDisplayTask, "Display",DISPLAYSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 
@@ -254,69 +168,20 @@ static portTASK_FUNCTION( vDisplayTask, pvParameters )
 {
    	/* The parameters are not used. */
 	( void ) pvParameters;
-
-    //u8x8_t u8x8;
-
-
-
-    xSemaphoreTake(DisplayUpdateSemaphore,portMAX_DELAY);
     
-    u8g2_FirstPage(&u8g2);
-    do
-    {
-        u8g2_SetFontMode(&u8g2, 1);	// Transparent
-        u8g2_SetFontDirection(&u8g2, 0);
-        /*u8g2_SetFont(&u8g2, u8g2_font_inb24_mf);
-        u8g2_DrawStr(&u8g2, 0, 30, "U");
-        
-        u8g2_SetFontDirection(&u8g2, 1);
-        u8g2_SetFont(&u8g2, u8g2_font_inb30_mn);
-        u8g2_DrawStr(&u8g2, 21,8,"8");
-            
-        u8g2_SetFontDirection(&u8g2, 0);
-        u8g2_SetFont(&u8g2, u8g2_font_inb24_mf);
-        u8g2_DrawStr(&u8g2, 51,30,"g");
-        u8g2_DrawStr(&u8g2, 67,30,"\xb2");*/
-        
-        //u8g2_DrawHLine(&u8g2, 2, 35, 47);
-        //u8g2_DrawHLine(&u8g2, 3, 36, 47);
-        //u8g2_DrawVLine(&u8g2, 45, 32, 12);
-        //u8g2_DrawVLine(&u8g2, 46, 33, 12); 
-      
-        u8g2_SetFont(&u8g2, u8g2_font_4x6_tr);
-        u8g2_DrawStr(&u8g2, 1,54,"github.com/olikraus/u8g2");
-    } while( u8g2_NextPage(&u8g2) );
-       
-    xSemaphoreTake(DisplayUpdateSemaphore,portMAX_DELAY);
-  
+    u8g2_Setup_ssd1306_128x64_noname_1(&u8g2, U8G2_R0, u8x8_byte_hw_SPI3, psoc_gpio_and_delay_cb);
+    u8g2_InitDisplay(&u8g2);  
+    u8g2_ClearDisplay(&u8g2);    
+    vTaskDelay(10);
+    DisplayUpdatePage(DISP_STATUS);
+    drawPage(currentPage);
+    drawPage(currentPage);
+    u8g2_SetPowerSave(&u8g2,0);
+
 	for(;;)
 	{
-        u8g2_FirstPage(&u8g2);
-        do
-        {
-            u8g2_SetFontMode(&u8g2, 1);	// Transparent
-            u8g2_SetFontDirection(&u8g2, 0);
-            /*u8g2_SetFont(&u8g2, u8g2_font_inb24_mf);
-            u8g2_DrawStr(&u8g2, 0, 30, "U");
-            
-            u8g2_SetFontDirection(&u8g2, 1);
-            u8g2_SetFont(&u8g2, u8g2_font_inb30_mn);
-            u8g2_DrawStr(&u8g2, 21,8,"8");
-                
-            u8g2_SetFontDirection(&u8g2, 0);
-            u8g2_SetFont(&u8g2, u8g2_font_inb24_mf);
-            u8g2_DrawStr(&u8g2, 51,30,"g");
-            u8g2_DrawStr(&u8g2, 67,30,"\xb2");*/
-            
-            //u8g2_DrawHLine(&u8g2, 2, 35, 47);
-            //u8g2_DrawHLine(&u8g2, 3, 36, 47);
-            //u8g2_DrawVLine(&u8g2, 45, 32, 12);
-            //u8g2_DrawVLine(&u8g2, 46, 33, 12); 
-          
-            u8g2_SetFont(&u8g2, u8g2_font_4x6_tr);
-            u8g2_DrawStr(&u8g2, 1,10,"Semaphore");
-        } while( u8g2_NextPage(&u8g2) );        
-        vTaskDelay(100);
+        xSemaphoreTake(DisplayUpdateSemaphore,portMAX_DELAY);
+        drawPage(currentPage);
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 

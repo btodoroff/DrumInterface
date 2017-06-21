@@ -63,22 +63,15 @@ void u8x8_d_helper_display_setup_memory(u8x8_t *u8x8, const u8x8_display_info_t 
 */
 void u8x8_d_helper_display_init(u8x8_t *u8x8)
 {
-      /* 2) apply port directions to the GPIO lines and apply default values for the IO lines*/
-      
-      #ifdef ARH
-        u8x8_gpio_Init(u8x8);
-      #endif
-        u8x8_cad_Init(u8x8);
 
-      /* 3) do reset */
-   //#ifdef ARH
+    u8x8_cad_Init(u8x8);
+
     u8x8_gpio_SetReset(u8x8, 1);
-      u8x8_gpio_Delay(u8x8, U8X8_MSG_DELAY_MILLI, u8x8->display_info->reset_pulse_width_ms);
-      u8x8_gpio_SetReset(u8x8, 0);
-      u8x8_gpio_Delay(u8x8, U8X8_MSG_DELAY_MILLI, u8x8->display_info->reset_pulse_width_ms);
-      u8x8_gpio_SetReset(u8x8, 1);
-      u8x8_gpio_Delay(u8x8, U8X8_MSG_DELAY_MILLI, u8x8->display_info->post_reset_wait_ms);
-    //#endif
+    u8x8_gpio_Delay(u8x8, U8X8_MSG_DELAY_MILLI, u8x8->display_info->reset_pulse_width_ms);
+    u8x8_gpio_SetReset(u8x8, 0);
+    u8x8_gpio_Delay(u8x8, U8X8_MSG_DELAY_MILLI, u8x8->display_info->reset_pulse_width_ms);
+    u8x8_gpio_SetReset(u8x8, 1);
+    u8x8_gpio_Delay(u8x8, U8X8_MSG_DELAY_MILLI, u8x8->display_info->post_reset_wait_ms);
 }    
 
 /*==========================================*/

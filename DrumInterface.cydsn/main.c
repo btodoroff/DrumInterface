@@ -63,6 +63,11 @@ void vCheckTask( void *pvParameters );
  */
 static void prvHardwareSetup( void );
 
+static int QUAD_BtnCount= 0;
+CY_ISR(isr_QUAD_SW_Count)
+{
+    QUAD_BtnCount+=1;
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -108,6 +113,11 @@ extern cyisraddress CyRamVectors[];
 	CyRamVectors[ 15 ] = ( cyisraddress ) xPortSysTickHandler;
 
 	/* Start-up the peripherals. */
+    Quad_Start();
+    Quad_SetCounter(0);
+    isr_QUAD_SW_ClearPending();
+    isr_QUAD_SW_StartEx(isr_QUAD_SW_Count);
+    
     USB_Start(0, USB_5V_OPERATION);
 
 	/* Start the UART. */
@@ -145,7 +155,7 @@ void vCheckTask( void *pvParameters )
 {
 TickType_t xDelay = 0;
 //unsigned short usErrorCode = 0;
-//unsigned long ulIteration = 0;
+unsigned long ulIteration = 0;
 //unsigned long ulMaxJitter = 0;
 //extern unsigned short usMaxJitter;
 
@@ -156,6 +166,10 @@ TickType_t xDelay = 0;
 	{
 		/* Perform this check every mainCHECK_DELAY milliseconds. */
 		vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
+        if(ulIteration&0x01)
+            DisplayUpdatePage(DISP_INTRO);
+        else
+            DisplayUpdatePage(DISP_STATUS);
 
         /*xsprintf(strbuf,"Tick #%d\r\n",ulIteration);
             usbserial_putString(strbuf);
@@ -164,7 +178,8 @@ TickType_t xDelay = 0;
         else
             usbmidi_noteOff(64,Trigger[3].lastSample>>4);*/
         SeqADCOutputSamples();
-        /*ulIteration++;*/
+        usbserial_xprintf("Decoder: %d   Btn: %d\r\n",Quad_GetCounter(),QUAD_BtnCount);
+        ulIteration++;
         
 	}
 }

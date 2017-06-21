@@ -181,9 +181,8 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_UART1_TX_BYTE_COMPLETE.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_UART1_RX_BYTE_RECEIVED.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_UART1_RX_BYTE_RECEIVED.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Startup_Release_Switch.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_1.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_1.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_1_IntClock.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_1_IntClock.h</File>
           <File BuildType="BUILD" Toolchain="ARM GCC Generic">Generated_Source\PSoC5\cm3gcc.ld</File>
@@ -283,6 +282,34 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\DISP_RESET_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\DISP_RESET.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\DISP_RESET.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CLK2_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CLK2.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CLK2.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CLK3_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CLK3.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SPI_CLK3.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Quad.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Quad.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Quad_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_A_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_A.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_A.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_B_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_B.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_B.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Quad_Cnt8.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Quad_Cnt8.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Quad_Cnt8_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_SW_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_SW.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_SW.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_2.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_2.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_QUAD_SW.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_QUAD_SW.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_PU_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_PU.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\QUAD_PU.h</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Users\bmt\Documents\GitHub\DrumInterface\DrumInterface.cydsn\Export\ARM_GCC_Generic">
