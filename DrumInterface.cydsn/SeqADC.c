@@ -161,6 +161,7 @@ static portTASK_FUNCTION( vADCTask, pvParameters )
                 event.type = ADCEVENT_HIT;
                 event.data.hit.triggerNumber = i;
                 event.data.hit.velocity = thisSample >> 4;
+                Trigger[i].lastVelocity = event.data.hit.velocity;
                 if(errQUEUE_FULL == xQueueSend(ADCEventQueue, &event, 0))
                     usbserial_putString("Hit queue overflow\r\n");
                 resetTrigger(i);

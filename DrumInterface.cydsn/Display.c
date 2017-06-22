@@ -5,17 +5,27 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
-#include "USBSerial.h"
 #include "u8g2.h"
+#include "xformatc.h"
+#include "SeqADC.h"
+
+
 
 /* Demo program include files. */
 //#include "partest.h"
 #include "Display.h"
 
-#define DISPLAYSTACK_SIZE		configMINIMAL_STACK_SIZE
+#define DISPLAYSTACK_SIZE		200
     
 /* The task that is created three times. */
 static portTASK_FUNCTION_PROTO( vDisplayTask, pvParameters );
+
+
+int QUAD_BtnCount= 0;
+CY_ISR(isr_QUAD_SW_Count)
+{
+    QUAD_BtnCount+=1;
+}
 
 SemaphoreHandle_t DisplayMutex;
 SemaphoreHandle_t DisplayUpdateSemaphore;
@@ -122,29 +132,79 @@ void DisplayUpdatePage(unsigned int pageNum)
     xSemaphoreGive(DisplayUpdateSemaphore);
 }
 
+static char u8g2Buf[65];
+static void u8g2Putchar(void *arg,char c)
+{
+    char ** s = (char **)arg;
+    *(*s)++ = c;
+}
+
+void u8g2_xprintf(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y,const char *fmt,...)
+{
+    char *buf = u8g2Buf;
+    va_list list;
+    va_start(list,fmt);
+    xvformat(u8g2Putchar,(void *)&buf,fmt,list);
+    *buf = 0;
+    u8g2_DrawStr(u8g2,x,y,u8g2Buf);
+    va_end(list);
+}
+
+void InvertIf(int test)
+{
+    if(test)
+    {
+        u8g2_SetFontMode(&u8g2, 0);	
+        u8g2_SetDrawColor(&u8g2, 0);
+    }
+    else
+    {
+        u8g2_SetFontMode(&u8g2, 1);	
+        u8g2_SetDrawColor(&u8g2, 1);
+    }
+}
+
+static int DisplayTuningCurrChannel = 3;
 void drawPage(unsigned int pageNum)
 {
     SPI_WriteByte(0x00A1); //Kludge to keep segment mapping from reseting.
     u8g2_FirstPage(&u8g2);
     do
     {
-        u8g2_SetFontPosTop(&u8g2);
-        u8g2_SetFontMode(&u8g2, 1);	// Transparent
-        u8g2_SetFontDirection(&u8g2, 0);
         u8g2_SetFont(&u8g2, u8g2_font_profont12_tf);
+        u8g2_SetFontPosTop(&u8g2);
+        u8g2_SetFontDirection(&u8g2, 0);
+        u8g2_SetFontMode(&u8g2, 1);	// Transparent
         switch(pageNum)
         {
             case DISP_INTRO:
-                u8g2_DrawStr(&u8g2, 1,1,"Drum Interface");
+                u8g2_DrawStr(&u8g2, 1,0,"Drum Interface");
                 u8g2_DrawStr(&u8g2, 1,10,"Version 0.0.0");
                 u8g2_DrawStr(&u8g2, 1,30,"Loading...");
             break;
             case DISP_STATUS:
-                u8g2_DrawStr(&u8g2, 1,1,"Drum Interface");
+                u8g2_DrawStr(&u8g2, 1,0,"Drum Interface");
                 u8g2_DrawStr(&u8g2, 1,10,"Version 0.0.0");
                 u8g2_DrawStr(&u8g2, 1,30,"Rockin'");
             break;
             case DISP_TUNING:
+                u8g2_SetDrawColor(&u8g2,1); /* color 1 for the box */
+                u8g2_DrawBox(&u8g2,0,(Quad_GetCounter()&0x03)*10, 60, 10);
+                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=0);
+                u8g2_xprintf(&u8g2, 1,0,"Note: %3d",64);
+                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=1);
+                u8g2_xprintf(&u8g2, 1,10,"Vel:  %3d",Trigger[DisplayTuningCurrChannel].lastVelocity);
+                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=2);
+                u8g2_xprintf(&u8g2, 1,20,"Thr: %4d",Trigger[DisplayTuningCurrChannel].thresholdHigh);
+                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=3);
+                u8g2_xprintf(&u8g2, 1,30,"Rel:  %3d",Trigger[DisplayTuningCurrChannel].thresholdLow);
+                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=4);
+                u8g2_xprintf(&u8g2, 1,40,"Delay:%3d",Trigger[DisplayTuningCurrChannel].retriggerDelay);
+                u8g2_SetFont(&u8g2, u8g2_font_fur42_tn);
+                u8g2_SetFontPosTop(&u8g2);
+                u8g2_SetDrawColor(&u8g2,1);
+                //u8g2_SetFontDirection(&u8g2, 0);
+                u8g2_DrawStr(&u8g2, 60,10,"14");
             break;
         }
     } while( u8g2_NextPage(&u8g2) );
@@ -156,6 +216,10 @@ void vStartDisplayTasks( UBaseType_t uxPriority )
     DisplayMutex = xSemaphoreCreateMutex();
     DisplayUpdateSemaphore = xSemaphoreCreateBinary();
     SPI_Start();
+    Quad_Start();
+    Quad_SetCounter(0);
+    isr_QUAD_SW_ClearPending();
+    isr_QUAD_SW_StartEx(isr_QUAD_SW_Count);
     
 	/* Spawn the task. */
 	xTaskCreate( vDisplayTask, "Display",DISPLAYSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
@@ -172,10 +236,10 @@ static portTASK_FUNCTION( vDisplayTask, pvParameters )
     u8g2_Setup_ssd1306_128x64_noname_1(&u8g2, U8G2_R0, u8x8_byte_hw_SPI3, psoc_gpio_and_delay_cb);
     u8g2_InitDisplay(&u8g2);  
     u8g2_ClearDisplay(&u8g2);    
-    vTaskDelay(10);
+    //vTaskDelay(10);
     DisplayUpdatePage(DISP_STATUS);
-    drawPage(currentPage);
-    drawPage(currentPage);
+    //drawPage(currentPage);
+    //drawPage(currentPage);
     u8g2_SetPowerSave(&u8g2,0);
 
 	for(;;)

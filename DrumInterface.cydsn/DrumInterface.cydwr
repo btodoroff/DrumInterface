@@ -391,11 +391,41 @@
     </Group>
   </Group>
   <Group key="Interrupt">
-    <Data key="02efb5ad-7029-477c-a888-f9f1511e916c" value="5" />
-    <Data key="4be9b064-b50c-4c90-b41c-7adbb8364931" value="5" />
-    <Data key="595e87a5-6d49-4a71-b8d9-3bee9fdc0077" value="6" />
-    <Data key="a9771fe3-8f69-437c-a0fc-8e93dbe5d92e" value="0" />
-    <Data key="c47fb12c-6974-486d-b829-a20f4afd3d9e" value="6" />
+    <Group key="02efb5ad-7029-477c-a888-f9f1511e916c">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="5" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
+    <Group key="4be9b064-b50c-4c90-b41c-7adbb8364931">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="5" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
+    <Group key="595e87a5-6d49-4a71-b8d9-3bee9fdc0077">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="6" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
+    <Group key="a9771fe3-8f69-437c-a0fc-8e93dbe5d92e">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="0" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
+    <Group key="c47fb12c-6974-486d-b829-a20f4afd3d9e">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="6" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
   </Group>
   <Group key="Pin2">
     <Group key="02f2cf2c-2c7a-49df-9246-7a3435c21be3">
@@ -450,7 +480,7 @@
     </Group>
     <Group key="9339d966-6fe6-4ae7-858f-c1a629b39cfb">
       <Group key="0">
-        <Data key="Port Format" value="0,7" />
+        <Data key="Port Format" value="0,5" />
       </Group>
     </Group>
     <Group key="22863ebe-a37b-476f-b252-6e49a8c00b12">
@@ -532,7 +562,7 @@
     </Group>
     <Group key="de249a1f-e255-4b34-8cb8-27c7ee52fbe4">
       <Group key="0">
-        <Data key="Port Format" value="0,5" />
+        <Data key="Port Format" value="0,7" />
       </Group>
     </Group>
     <Group key="ed092b9b-d398-4703-be89-cebf998501f6">
@@ -580,7 +610,27 @@
     </Group>
   </Group>
   <Group key="System3">
+    <Data key="CYDEV_CONFIG_FASTBOOT_ENABLED" value="True" />
+    <Data key="CYDEV_CONFIG_UNUSED_IO" value="AllowButWarn" />
+    <Data key="CYDEV_CONFIGURATION_ECC" value="True" />
+    <Data key="CYDEV_CONFIGURATION_MODE" value="COMPRESSED" />
+    <Data key="CYDEV_DEBUGGING_DPS" value="SWD_SWV" />
+    <Data key="CYDEV_DEBUGGING_XRES" value="False" />
+    <Data key="CYDEV_ECC_ENABLE" value="False" />
     <Data key="CYDEV_HEAP_SIZE" value="0" />
+    <Data key="CYDEV_INSTRUCT_CACHE_ENABLED" value="True" />
+    <Data key="CYDEV_PROTECTION_ENABLE" value="False" />
     <Data key="CYDEV_STACK_SIZE" value="1024" />
+    <Data key="CYDEV_TEMPERATURE" value="-40C - 85/125C" />
+    <Data key="CYDEV_TRACE_ENABLED" value="False" />
+    <Data key="CYDEV_USE_BUNDLED_CMSIS" value="True" />
+    <Data key="CYDEV_VARIABLE_VDDA" value="False" />
+    <Data key="CYDEV_VDDA" value="5.0" />
+    <Data key="CYDEV_VDDD" value="5.0" />
+    <Data key="CYDEV_VDDIO0" value="5.0" />
+    <Data key="CYDEV_VDDIO1" value="5.0" />
+    <Data key="CYDEV_VDDIO2" value="5.0" />
+    <Data key="CYDEV_VDDIO3" value="5.0" />
+    <Data key="CYDEV_WO_NVL_ENABLED" value="False" />
   </Group>
 </DesignWideResources>

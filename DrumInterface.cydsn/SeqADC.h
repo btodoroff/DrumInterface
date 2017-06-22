@@ -8,6 +8,7 @@ void vStartADCTasks( UBaseType_t uxPriority );
 void SeqADCOutputSamples();
 struct TriggerInfo {
     int lastSample;         //Last value read from ADC channel
+    int lastVelocity;       //Last velocity reported for trigger
     int thresholdHigh;      //ADC min level to trigger
     int thresholdLow;       //ADC max level to release
     int active;             //0 = not waiting for release and retrigger

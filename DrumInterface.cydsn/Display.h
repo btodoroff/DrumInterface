@@ -5,6 +5,8 @@
 #define DISP_STATUS     (1)
 #define DISP_TUNING     (2)
     
+extern int QUAD_BtnCount;
+
 void vStartDisplayTasks( UBaseType_t uxPriority );
 void DisplayUpdatePage(unsigned int pageNum);
 

@@ -5,6 +5,9 @@
 *.cywrk.*
 *.cyprj.*
 *.lst
+*.o
 ARM_GCC_493/
+ARM_GCC_541/
 codegentemp/
 Generated_Source/
+Backup/

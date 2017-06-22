@@ -63,12 +63,6 @@ void vCheckTask( void *pvParameters );
  */
 static void prvHardwareSetup( void );
 
-static int QUAD_BtnCount= 0;
-CY_ISR(isr_QUAD_SW_Count)
-{
-    QUAD_BtnCount+=1;
-}
-
 /*---------------------------------------------------------------------------*/
 
 int main( void )
@@ -112,11 +106,6 @@ extern cyisraddress CyRamVectors[];
 	CyRamVectors[ 14 ] = ( cyisraddress ) xPortPendSVHandler;
 	CyRamVectors[ 15 ] = ( cyisraddress ) xPortSysTickHandler;
 
-	/* Start-up the peripherals. */
-    Quad_Start();
-    Quad_SetCounter(0);
-    isr_QUAD_SW_ClearPending();
-    isr_QUAD_SW_StartEx(isr_QUAD_SW_Count);
     
     USB_Start(0, USB_5V_OPERATION);
 
@@ -153,11 +142,12 @@ static void xsprintf(char *buf,const char *fmt,...)
 
 void vCheckTask( void *pvParameters )
 {
-TickType_t xDelay = 0;
-//unsigned short usErrorCode = 0;
-unsigned long ulIteration = 0;
-//unsigned long ulMaxJitter = 0;
-//extern unsigned short usMaxJitter;
+    TickType_t xDelay = 0;
+    //unsigned short usErrorCode = 0;
+    int lastBtnCount = 0;
+    int lastQuadCount = 0;
+    int tickCounter = 0;
+    //extern unsigned short usMaxJitter;
 
 	/* Intialise the sleeper. */
 	xDelay = xTaskGetTickCount();
@@ -165,11 +155,23 @@ unsigned long ulIteration = 0;
 	for( ;; )
 	{
 		/* Perform this check every mainCHECK_DELAY milliseconds. */
-		vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
-        if(ulIteration&0x01)
-            DisplayUpdatePage(DISP_INTRO);
-        else
-            DisplayUpdatePage(DISP_STATUS);
+		//vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
+        vTaskDelay(100);
+        if(lastBtnCount != QUAD_BtnCount)
+        {
+            lastBtnCount = QUAD_BtnCount;
+            if(lastBtnCount&0x01)
+                DisplayUpdatePage(DISP_STATUS);
+            else
+                DisplayUpdatePage(DISP_TUNING);
+        }
+        if(lastQuadCount != Quad_GetCounter())
+        {
+            lastQuadCount = Quad_GetCounter();
+            if(!(lastBtnCount&0x01))
+                DisplayUpdatePage(DISP_TUNING);
+        }
+        
 
         /*xsprintf(strbuf,"Tick #%d\r\n",ulIteration);
             usbserial_putString(strbuf);
@@ -177,10 +179,12 @@ unsigned long ulIteration = 0;
             usbmidi_noteOn(64,Trigger[2].lastSample>>4);
         else
             usbmidi_noteOff(64,Trigger[3].lastSample>>4);*/
-        SeqADCOutputSamples();
-        usbserial_xprintf("Decoder: %d   Btn: %d\r\n",Quad_GetCounter(),QUAD_BtnCount);
-        ulIteration++;
-        
+        if(tickCounter++<50)
+        {
+            tickCounter = 0;
+            SeqADCOutputSamples();
+            usbserial_xprintf("Decoder: %d   Btn: %d\r\n",Quad_GetCounter(),QUAD_BtnCount);
+        }        
 	}
 }
 /*---------------------------------------------------------------------------*/
