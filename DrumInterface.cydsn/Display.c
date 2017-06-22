@@ -189,22 +189,23 @@ void drawPage(unsigned int pageNum)
             break;
             case DISP_TUNING:
                 u8g2_SetDrawColor(&u8g2,1); /* color 1 for the box */
+                u8g2_xprintf(&u8g2, 70,55,"Vel:  %3d",Trigger[DisplayTuningCurrChannel].lastVelocity);
                 u8g2_DrawBox(&u8g2,0,(Quad_GetCounter()&0x03)*10, 60, 10);
                 u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=0);
                 u8g2_xprintf(&u8g2, 1,0,"Note: %3d",64);
                 u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=1);
-                u8g2_xprintf(&u8g2, 1,10,"Vel:  %3d",Trigger[DisplayTuningCurrChannel].lastVelocity);
+                u8g2_xprintf(&u8g2, 1,10,"Delay:%3d",Trigger[DisplayTuningCurrChannel].retriggerDelay);
                 u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=2);
                 u8g2_xprintf(&u8g2, 1,20,"Thr: %4d",Trigger[DisplayTuningCurrChannel].thresholdHigh);
                 u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=3);
                 u8g2_xprintf(&u8g2, 1,30,"Rel:  %3d",Trigger[DisplayTuningCurrChannel].thresholdLow);
-                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=4);
-                u8g2_xprintf(&u8g2, 1,40,"Delay:%3d",Trigger[DisplayTuningCurrChannel].retriggerDelay);
                 u8g2_SetFont(&u8g2, u8g2_font_fur42_tn);
                 u8g2_SetFontPosTop(&u8g2);
                 u8g2_SetDrawColor(&u8g2,1);
                 //u8g2_SetFontDirection(&u8g2, 0);
-                u8g2_DrawStr(&u8g2, 60,10,"14");
+                u8g2_xprintf(&u8g2, 60,1,"%02d",DisplayTuningCurrChannel);
+
+                //u8g2_DrawStr(&u8g2, 60,1,DisplayTuningCurrChannel);
             break;
         }
     } while( u8g2_NextPage(&u8g2) );
