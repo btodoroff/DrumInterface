@@ -8,6 +8,7 @@
 #include "u8g2.h"
 #include "xformatc.h"
 #include "SeqADC.h"
+#include "USBSerial.h"
 
 
 
@@ -16,19 +17,24 @@
 #include "Display.h"
 
 #define DISPLAYSTACK_SIZE		200
+#define UISTACK_SIZE		    configMINIMAL_STACK_SIZE
     
 /* The task that is created three times. */
 static portTASK_FUNCTION_PROTO( vDisplayTask, pvParameters );
+static portTASK_FUNCTION_PROTO( vUITask, pvParameters );
 
 
 int QUAD_BtnCount= 0;
+static struct UIEvent isrButtonEvent;
 CY_ISR(isr_QUAD_SW_Count)
 {
     QUAD_BtnCount+=1;
+    xQueueSendToBackFromISR(UIEventQueue,&isrButtonEvent,NULL);
 }
 
 SemaphoreHandle_t DisplayMutex;
 SemaphoreHandle_t DisplayUpdateSemaphore;
+QueueHandle_t UIEventQueue;
 
 /*-----------------------------------------------------------*/
 
@@ -150,21 +156,45 @@ void u8g2_xprintf(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y,const char *fmt,...
     va_end(list);
 }
 
-void InvertIf(int test)
+
+static struct {
+    enum UIState {
+        NONE,
+        STATUS,
+        TUNING_SELECT,
+        TUNING_EDIT
+    } state;
+    int menuItem;
+    unsigned char curTrigger;
+} UI;
+
+
+void vStartDisplayTasks( UBaseType_t uxPriority )
 {
-    if(test)
-    {
-        u8g2_SetFontMode(&u8g2, 0);	
-        u8g2_SetDrawColor(&u8g2, 0);
-    }
-    else
-    {
-        u8g2_SetFontMode(&u8g2, 1);	
-        u8g2_SetDrawColor(&u8g2, 1);
-    }
+    /*Setup the mutex to control port access*/
+    DisplayMutex = xSemaphoreCreateMutex();
+    DisplayUpdateSemaphore = xSemaphoreCreateBinary();
+    UIEventQueue = xQueueCreate( 8, sizeof(struct UIEvent));
+
+    SPI_Start();
+    Quad_Start();
+    Quad_SetCounter(0);
+    isrButtonEvent.type = UIEVENT_BTN;
+    isrButtonEvent.data.Button.number = 0;
+    isrButtonEvent.data.Button.release = 1;
+    isr_QUAD_SW_ClearPending();
+    isr_QUAD_SW_StartEx(isr_QUAD_SW_Count);
+    UI.state = NONE;
+    UI.menuItem = 0;
+    UI.curTrigger = 0;
+    
+	/* Spawn the task. */
+	xTaskCreate( vDisplayTask, "Display",DISPLAYSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
+	xTaskCreate( vUITask, "UI",DISPLAYSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 }
 
-static int DisplayTuningCurrChannel = 3;
+
+
 void drawPage(unsigned int pageNum)
 {
     SPI_WriteByte(0x00A1); //Kludge to keep segment mapping from reseting.
@@ -188,44 +218,147 @@ void drawPage(unsigned int pageNum)
                 u8g2_DrawStr(&u8g2, 1,30,"Rockin'");
             break;
             case DISP_TUNING:
-                u8g2_SetDrawColor(&u8g2,1); /* color 1 for the box */
-                u8g2_xprintf(&u8g2, 70,55,"Vel:  %3d",Trigger[DisplayTuningCurrChannel].lastVelocity);
-                u8g2_DrawBox(&u8g2,0,(Quad_GetCounter()&0x03)*10, 60, 10);
-                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=0);
-                u8g2_xprintf(&u8g2, 1,0,"Note: %3d",64);
-                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=1);
-                u8g2_xprintf(&u8g2, 1,10,"Delay:%3d",Trigger[DisplayTuningCurrChannel].retriggerDelay);
-                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=2);
-                u8g2_xprintf(&u8g2, 1,20,"Thr: %4d",Trigger[DisplayTuningCurrChannel].thresholdHigh);
-                u8g2_SetDrawColor(&u8g2,(Quad_GetCounter()&0x03)!=3);
-                u8g2_xprintf(&u8g2, 1,30,"Rel:  %3d",Trigger[DisplayTuningCurrChannel].thresholdLow);
-                u8g2_SetFont(&u8g2, u8g2_font_fur42_tn);
-                u8g2_SetFontPosTop(&u8g2);
-                u8g2_SetDrawColor(&u8g2,1);
-                //u8g2_SetFontDirection(&u8g2, 0);
-                u8g2_xprintf(&u8g2, 60,1,"%02d",DisplayTuningCurrChannel);
-
-                //u8g2_DrawStr(&u8g2, 60,1,DisplayTuningCurrChannel);
+                if(UI.state == TUNING_SELECT) {
+                    u8g2_SetDrawColor(&u8g2,1); /* color 1 for the box */
+                    u8g2_xprintf(&u8g2, 70,55,"Vel:  %3d",Trigger[UI.curTrigger].lastVelocity);
+                    u8g2_DrawBox(&u8g2,0,UI.menuItem*10, 60, 10);
+                    u8g2_SetDrawColor(&u8g2,UI.menuItem!=0);
+                    u8g2_xprintf(&u8g2, 1,0,"Note: %3d",Trigger[UI.curTrigger].midiNote);
+                    u8g2_SetDrawColor(&u8g2,UI.menuItem!=1);
+                    u8g2_xprintf(&u8g2, 1,10,"Delay:%3d",Trigger[UI.curTrigger].retriggerDelay);
+                    u8g2_SetDrawColor(&u8g2,UI.menuItem!=2);
+                    u8g2_xprintf(&u8g2, 1,20,"Thr: %4d",Trigger[UI.curTrigger].thresholdHigh);
+                    u8g2_SetDrawColor(&u8g2,UI.menuItem!=3);
+                    u8g2_xprintf(&u8g2, 1,30,"Rel:  %3d",Trigger[UI.curTrigger].thresholdLow);
+                    u8g2_SetFont(&u8g2, u8g2_font_fur42_tn);
+                    u8g2_SetFontPosTop(&u8g2);
+                    u8g2_SetDrawColor(&u8g2,1);
+                    u8g2_xprintf(&u8g2, 60,1,"%02d",UI.curTrigger);
+                } else {
+                    const int boxOffset[] = { 37,37,25,33 };
+                    u8g2_SetDrawColor(&u8g2,1); /* color 1 for the box */
+                    u8g2_DrawBox(&u8g2,boxOffset[UI.menuItem],UI.menuItem*10, 60-boxOffset[UI.menuItem], 10);
+                    u8g2_xprintf(&u8g2, 70,55,"Vel:  %3d",Trigger[UI.curTrigger].lastVelocity);
+                    u8g2_xprintf(&u8g2, 1,0,"Note: %3d",Trigger[UI.curTrigger].midiNote);
+                    u8g2_xprintf(&u8g2, 1,10,"Delay:%3d",Trigger[UI.curTrigger].retriggerDelay);
+                    u8g2_xprintf(&u8g2, 1,20,"Thr: %4d",Trigger[UI.curTrigger].thresholdHigh);
+                    u8g2_xprintf(&u8g2, 1,30,"Rel:  %3d",Trigger[UI.curTrigger].thresholdLow);
+                    u8g2_SetDrawColor(&u8g2,0); 
+                    switch(UI.menuItem) {
+                        case 0:
+                            u8g2_xprintf(&u8g2, 1,0,"      %3d",Trigger[UI.curTrigger].midiNote);
+                            break;
+                        case 1:
+                            u8g2_xprintf(&u8g2, 1,10,"      %3d",Trigger[UI.curTrigger].retriggerDelay);
+                            break;
+                        case 2:
+                            u8g2_xprintf(&u8g2, 1,20,"     %4d",Trigger[UI.curTrigger].thresholdHigh);
+                            break;
+                        case 3:
+                            u8g2_xprintf(&u8g2, 1,30,"      %3d",Trigger[UI.curTrigger].thresholdLow);
+                            break;
+                    }
+                    u8g2_SetFont(&u8g2, u8g2_font_fur42_tn);
+                    u8g2_SetFontPosTop(&u8g2);
+                    u8g2_SetDrawColor(&u8g2,1);
+                    u8g2_xprintf(&u8g2, 60,1,"%02d",UI.curTrigger);
+                }
             break;
         }
     } while( u8g2_NextPage(&u8g2) );
 }
 
-void vStartDisplayTasks( UBaseType_t uxPriority )
-{
-    /*Setup the mutex to control port access*/
-    DisplayMutex = xSemaphoreCreateMutex();
-    DisplayUpdateSemaphore = xSemaphoreCreateBinary();
-    SPI_Start();
-    Quad_Start();
-    Quad_SetCounter(0);
-    isr_QUAD_SW_ClearPending();
-    isr_QUAD_SW_StartEx(isr_QUAD_SW_Count);
-    
-	/* Spawn the task. */
-	xTaskCreate( vDisplayTask, "Display",DISPLAYSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 
-}
+static portTASK_FUNCTION( vUITask, pvParameters )
+{
+    static struct UIEvent queueEvent;
+    int8 lastQuadCount = 0;
+    Quad_SetCounter(0);
+
+   	/* The parameters are not used. */
+	( void ) pvParameters;
+    
+	for(;;)
+	{
+        if(pdPASS == xQueueReceive(UIEventQueue,&queueEvent,50))
+        {
+            switch(UI.state) {
+                case TUNING_SELECT:
+                    switch(queueEvent.type) {
+                        case UIEVENT_QUAD:
+                            UI.menuItem = (UI.menuItem + queueEvent.data.QUADChange.delta + 4) % 4;
+                            DisplayUpdatePage(DISP_TUNING);
+                            break;
+                        case UIEVENT_TRIG:
+                            UI.curTrigger = queueEvent.data.Trigger.number;
+                            DisplayUpdatePage(DISP_TUNING);
+                            break;
+                        case UIEVENT_BTN:
+                            UI.state = TUNING_EDIT;
+                            DisplayUpdatePage(DISP_TUNING);
+                            break;
+                    }
+                    break;
+                case TUNING_EDIT:
+                    switch(queueEvent.type) {
+                        case UIEVENT_QUAD:
+                            switch(UI.menuItem) {
+                                case 0:
+                                    Trigger[UI.curTrigger].midiNote += queueEvent.data.QUADChange.delta;
+                                    break;
+                                case 1:
+                                    Trigger[UI.curTrigger].retriggerDelay += queueEvent.data.QUADChange.delta;
+                                    break;
+                                case 2:
+                                    Trigger[UI.curTrigger].thresholdHigh += queueEvent.data.QUADChange.delta*10;
+                                    break;
+                                case 3:
+                                    Trigger[UI.curTrigger].thresholdLow += queueEvent.data.QUADChange.delta*10;
+                                    break;
+                            }
+                            DisplayUpdatePage(DISP_TUNING);
+                            break;
+                        case UIEVENT_TRIG:
+                            if(UI.curTrigger == queueEvent.data.Trigger.number) {
+                                DisplayUpdatePage(DISP_TUNING);
+                            }
+                            else
+                            {
+                                UI.curTrigger = queueEvent.data.Trigger.number;
+                                UI.state = TUNING_SELECT;
+                                DisplayUpdatePage(DISP_TUNING);
+                            }
+                            break;
+                        case UIEVENT_BTN:
+                            UI.state = TUNING_SELECT;
+                            DisplayUpdatePage(DISP_TUNING);
+                            break;
+                    }
+                    break;
+                case STATUS:
+                    switch(queueEvent.type) {
+                        case UIEVENT_BTN:
+                            UI.state = TUNING_SELECT;
+                            DisplayUpdatePage(DISP_TUNING);
+                            break;
+                    }
+                    break;
+                default:
+                    UI.state=STATUS;
+                    DisplayUpdatePage(DISP_STATUS);
+                    break;
+            }
+        }
+        if(Quad_GetCounter() != lastQuadCount)
+        {
+            queueEvent.type = UIEVENT_QUAD;
+            queueEvent.data.QUADChange.newValue = Quad_GetCounter();
+            queueEvent.data.QUADChange.delta = queueEvent.data.QUADChange.newValue - lastQuadCount;
+            if(pdTRUE == xQueueSend(UIEventQueue,&queueEvent,0)) lastQuadCount = queueEvent.data.QUADChange.newValue;
+        }
+	}
+} /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
+
 
 /*-----------------------------------------------------------*/
 
@@ -238,11 +371,9 @@ static portTASK_FUNCTION( vDisplayTask, pvParameters )
     u8g2_InitDisplay(&u8g2);  
     u8g2_ClearDisplay(&u8g2);    
     //vTaskDelay(10);
-    DisplayUpdatePage(DISP_STATUS);
-    //drawPage(currentPage);
-    //drawPage(currentPage);
+    drawPage(DISP_INTRO);
     u8g2_SetPowerSave(&u8g2,0);
-
+    xQueueSendToBack(UIEventQueue,&u8g2,0);
 	for(;;)
 	{
         xSemaphoreTake(DisplayUpdateSemaphore,portMAX_DELAY);

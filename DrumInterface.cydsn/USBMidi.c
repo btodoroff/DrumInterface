@@ -26,7 +26,7 @@ SemaphoreHandle_t USBMidiMutex;
 
 void usbmidi_noteOn(uint8 note, uint8 velocity)
 {
-    uint8 onMsg[] = {0x9A,note,velocity};
+    uint8 onMsg[] = {0x99,note,velocity};
     if(0 == USB_GetConfiguration()) return;
     xSemaphoreTake(USBMidiMutex,portMAX_DELAY);
     USB_PutUsbMidiIn(3,onMsg,USB_MIDI_CABLE_00);
@@ -35,7 +35,7 @@ void usbmidi_noteOn(uint8 note, uint8 velocity)
 
 void usbmidi_noteOff(uint8 note, uint8 velocity)
 {
-    uint8 offMsg[] = {0x8A,note,velocity};
+    uint8 offMsg[] = {0x89,note,velocity};
     if(0 == USB_GetConfiguration()) return;
     xSemaphoreTake(USBMidiMutex,portMAX_DELAY);
     USB_PutUsbMidiIn(3,offMsg,USB_MIDI_CABLE_00);
@@ -93,9 +93,13 @@ static portTASK_FUNCTION( vUSBMidiTask, pvParameters )
             {
                 if(queueEvent.type == ADCEVENT_HIT)
                 {
-                    usbserial_xprintf("Trigger:%02d @ %03d\r\n",queueEvent.data.hit.triggerNumber,queueEvent.data.hit.velocity);
-                    usbmidi_noteOn(64+queueEvent.data.hit.triggerNumber,queueEvent.data.hit.velocity);
-                    usbmidi_noteOff(64+queueEvent.data.hit.triggerNumber,0);
+                    //usbserial_xprintf("Trigger:%02d @ %03d\r\n",queueEvent.data.hit.triggerNumber,queueEvent.data.hit.velocity);
+                    usbmidi_noteOn(Trigger[queueEvent.data.hit.triggerNumber].midiNote,queueEvent.data.hit.velocity);
+                }
+                else if(queueEvent.type == ADCEVENT_RELEASE)
+                {
+                    //usbserial_xprintf("Trigger:%02d @ %03d\r\n",queueEvent.data.hit.triggerNumber,queueEvent.data.hit.velocity);
+                    usbmidi_noteOff(Trigger[queueEvent.data.hit.triggerNumber].midiNote,0);
                 }
             }
             /* Get and process inputs here */

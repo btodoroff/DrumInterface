@@ -14,13 +14,19 @@ struct TriggerInfo {
     int active;             //0 = not waiting for release and retrigger
     int retriggerDelay;     //How many sample periods to mask out after trigger
     int retriggerCountdown; //How long left till ready for retrigger
+    int midiNote;
 };
 #define ADCEVENT_HIT (1)
 struct HitInfo {
     unsigned char triggerNumber;
     unsigned char velocity;
 };
-#define ADCEVENT_CTRL (2)
+#define ADCEVENT_RELEASE (2)
+struct ReleaseInfo {
+    unsigned char triggerNumber;
+    unsigned char velocity;
+};
+#define ADCEVENT_CTRL (3)
 struct CtrlChange {
     unsigned char ctrlNumber;
     unsigned char newValue;

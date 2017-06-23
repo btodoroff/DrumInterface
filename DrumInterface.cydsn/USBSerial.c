@@ -68,6 +68,24 @@ void usbserial_xprintf(const char *fmt,...)
     xSemaphoreGive(USBSerialMutex);
 }
 
+static char serialBuf[128];
+static void serialPutchar(void *arg,char c)
+{
+    char ** s = (char **)arg;
+    *(*s)++ = c;
+}
+
+void serial_xprintf(const char *fmt,...)
+{
+    char *buf = serialBuf;
+    va_list list;
+    va_start(list,fmt);
+    xvformat(serialPutchar,(void *)&buf,fmt,list);
+    *buf = 0;
+    UART_1_PutString(serialBuf);
+    va_end(list);
+}
+
 /*
 void xsprintf(char *buf,const char *fmt,...)
 {

@@ -114,38 +114,15 @@ extern cyisraddress CyRamVectors[];
 
 	/* Initialise the LEDs. */
 	vParTestInitialise();
-
-	/* Start the PWM modules that drive the IntQueue tests. */
-	//High_Frequency_PWM_0_Start();
-	//High_Frequency_PWM_1_Start();
-
-	/* Start the timers for the Jitter test. */
-	//Timer_20KHz_Start();
-	//Timer_48MHz_Start();
 }
 /*---------------------------------------------------------------------------*/
-
-/*static void myPutchar(void *arg,char c)
-{
-    char ** s = (char **)arg;
-    *(*s)++ = c;
-}
-
-static void xsprintf(char *buf,const char *fmt,...)
-{
-    va_list list;
-    va_start(list,fmt);
-    xvformat(myPutchar,(void *)&buf,fmt,list);
-    *buf = 0;
-    va_end(list);
-}*/
 
 void vCheckTask( void *pvParameters )
 {
     TickType_t xDelay = 0;
     //unsigned short usErrorCode = 0;
-    int lastBtnCount = 0;
-    int lastQuadCount = 0;
+//    int lastBtnCount = 0;
+//    int lastQuadCount = 0;
     int tickCounter = 0;
     //extern unsigned short usMaxJitter;
 
@@ -155,22 +132,22 @@ void vCheckTask( void *pvParameters )
 	for( ;; )
 	{
 		/* Perform this check every mainCHECK_DELAY milliseconds. */
-		//vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
-        vTaskDelay(100);
-        if(lastBtnCount != QUAD_BtnCount)
-        {
-            lastBtnCount = QUAD_BtnCount;
-            if(lastBtnCount&0x01)
-                DisplayUpdatePage(DISP_STATUS);
-            else
-                DisplayUpdatePage(DISP_TUNING);
-        }
-        if(lastQuadCount != Quad_GetCounter())
-        {
-            lastQuadCount = Quad_GetCounter();
-            if(!(lastBtnCount&0x01))
-                DisplayUpdatePage(DISP_TUNING);
-        }
+		vTaskDelayUntil( &xDelay, mainCHECK_DELAY );
+//        vTaskDelay(100);
+//        if(lastBtnCount != QUAD_BtnCount)
+//        {
+//            lastBtnCount = QUAD_BtnCount;
+//            if(lastBtnCount&0x01)
+//                DisplayUpdatePage(DISP_STATUS);
+//            else
+//                DisplayUpdatePage(DISP_TUNING);
+//        }
+//        if(lastQuadCount != Quad_GetCounter())
+//        {
+//            lastQuadCount = Quad_GetCounter();
+//            if(!(lastBtnCount&0x01))
+//                DisplayUpdatePage(DISP_TUNING);
+//        }
         
 
         /*xsprintf(strbuf,"Tick #%d\r\n",ulIteration);
@@ -179,11 +156,11 @@ void vCheckTask( void *pvParameters )
             usbmidi_noteOn(64,Trigger[2].lastSample>>4);
         else
             usbmidi_noteOff(64,Trigger[3].lastSample>>4);*/
-        if(tickCounter++<50)
+//        if(tickCounter++>50)
         {
             tickCounter = 0;
-            SeqADCOutputSamples();
-            usbserial_xprintf("Decoder: %d   Btn: %d\r\n",Quad_GetCounter(),QUAD_BtnCount);
+            //SeqADCOutputSamples();
+            //usbserial_xprintf("Decoder: %d   Btn: %d\r\n",Quad_GetCounter(),QUAD_BtnCount);
         }        
 	}
 }

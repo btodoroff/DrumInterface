@@ -6,6 +6,7 @@
 #include "semphr.h"
 #include "SeqADC.h"
 #include "USBSerial.h"
+#include "Display.h"
 
 //#include "xformatc.h"
 
@@ -126,16 +127,20 @@ static portTASK_FUNCTION( vADCTask, pvParameters )
 	( void ) pvParameters;
     int i = 0;
     int thisSample;
+    static struct UIEvent triggerEvent;
     static struct ADCEvent event;
+    triggerEvent.type = UIEVENT_TRIG;
+    triggerEvent.data.Trigger.number = 5;
     
     xSampleRate = 1 / portTICK_PERIOD_MS;
     for(i=0;i<ADCNUM_CHANNELS;i++)
     {
         Trigger[i].retriggerCountdown = 0;
-        Trigger[i].retriggerDelay = 5;
+        Trigger[i].retriggerDelay = 2;
         Trigger[i].active = 0;
         Trigger[i].thresholdHigh = 2000;
-        Trigger[i].thresholdLow = 5;
+        Trigger[i].thresholdLow = 400;
+        Trigger[i].midiNote = 35+i;
     }
     /* Start the ADC */
     ADC_Start();
@@ -160,8 +165,10 @@ static portTASK_FUNCTION( vADCTask, pvParameters )
                 Trigger[i].retriggerCountdown = Trigger[i].retriggerDelay;
                 event.type = ADCEVENT_HIT;
                 event.data.hit.triggerNumber = i;
-                event.data.hit.velocity = thisSample >> 4;
+                event.data.hit.velocity = thisSample >> 5;
                 Trigger[i].lastVelocity = event.data.hit.velocity;
+                triggerEvent.data.Trigger.number = i;
+                xQueueSendToBack(UIEventQueue,&triggerEvent,0);
                 if(errQUEUE_FULL == xQueueSend(ADCEventQueue, &event, 0))
                     usbserial_putString("Hit queue overflow\r\n");
                 resetTrigger(i);
@@ -172,18 +179,23 @@ static portTASK_FUNCTION( vADCTask, pvParameters )
                 //We are wating for the signal to stay low and avoid retriggers
                 resetTrigger(i);
                 Trigger[i].retriggerCountdown = Trigger[i].retriggerDelay;
-                usbserial_xprintf("%d @ %d\r\n",Trigger[i].retriggerCountdown,thisSample);
+                //usbserial_xprintf("%d @ %d\r\n",Trigger[i].retriggerCountdown,thisSample);
 
             }
             else if(Trigger[i].active && --Trigger[i].retriggerCountdown <= 0) //sample < thresholdLow
             {
                 //Ok, we can start looking for another hit!
                 Trigger[i].active = 0;
-                usbserial_putString("Release\r\n");
+                event.type = ADCEVENT_RELEASE;
+                event.data.hit.triggerNumber = i;
+                event.data.hit.velocity = thisSample >> 5;
+                if(errQUEUE_FULL == xQueueSend(ADCEventQueue, &event, 0))
+                    usbserial_putString("Hit queue overflow\r\n");
+                //usbserial_putString("Release\r\n");
             }
             else if(Trigger[i].active)
             {
-                usbserial_xprintf("%d @ %4d\r\n",Trigger[i].retriggerCountdown,thisSample);
+                //usbserial_xprintf("%d @ %4d\r\n",Trigger[i].retriggerCountdown,thisSample);
             }
             Trigger[i].lastSample = thisSample;
         }
